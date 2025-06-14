@@ -1,4 +1,4 @@
-from app import create_app
+from recipe_mgmt.app import create_app
 
 
 def test_can_create_app():
