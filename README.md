@@ -1,2 +1,2 @@
 # RecipeMgmt
-A Python app to store, retrieve and manage recpies.
+A Python app to store, retrieve and manage recipes.
