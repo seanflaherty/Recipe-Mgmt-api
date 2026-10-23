@@ -8,10 +8,15 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12,<4.0"
 dependencies = [
+    "connexion[swagger-ui] (>=3.2.0,<4.0.0)"
 ]
 
 [tool.poetry]
 packages = [{include = "recipe_mgmt", from = "src"}]
+
+[[tool.mypy.overrides]]
+module = "connexion.*"
+ignore_missing_imports = true
 
 
 [build-system]
