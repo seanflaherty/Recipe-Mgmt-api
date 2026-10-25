@@ -18,6 +18,16 @@ packages = [{include = "recipe_mgmt", from = "src"}]
 module = "connexion.*"
 ignore_missing_imports = true
 
+[tool.pylint.main]
+init-hook = "import sys; sys.path.append('.')"
+source-roots = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
