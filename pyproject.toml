@@ -24,11 +24,13 @@ init-hook = "import sys; sys.path.append('.')"
 source-roots = ["src"]
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+# SCF pythonpath = ["."]
+pythonpath = ["src"]
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::UserWarning",
 ]
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
