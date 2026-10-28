@@ -1,0 +1,7 @@
+type,ingredient_name,quantity,unit,dietary_tags,instruction,prep_time,equipment,include_in_prep_time
+ingredient,Carrot,2,pcs,VEGAN;GLUTEN_FREE,-,-,-,-
+ingredient,Lettuce,5,leaves,VEGAN;NUT_FREE,-,-,-,-
+ingredient,Tofu,150,grams,VEGAN,-,-,-,-
+instruction,-,-,-,-,Peel carrots,3,peeler,True
+instruction,-,-,-,-,Wash lettuce,2,bowl,True
+instruction,-,-,-,-,Stir fry,8,pan,True

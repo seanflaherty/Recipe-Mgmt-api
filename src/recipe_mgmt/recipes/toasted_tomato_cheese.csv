@@ -1,0 +1,7 @@
+type,ingredient_name,quantity,unit,dietary_tags,instruction,prep_time,equipment,include_in_prep_time
+ingredient,Bread,2,slices,VEGETARIAN,-,-,-,-
+ingredient,Tomato,1,pcs,VEGAN,-,-,-,-
+ingredient,Cheese,30,grams,VEGETARIAN,-,-,-,-
+instruction,-,-,-,-,Toast bread,4,toaster,True
+instruction,-,-,-,-,Slice tomato,2,knife,True
+instruction,-,-,-,-,Assemble sandwich,1,board,True

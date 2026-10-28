@@ -1,0 +1,11 @@
+type,ingredient_name,quantity,unit,dietary_tags,instruction,prep_time,equipment,include_in_prep_time
+ingredient,Tomato,100,pcs,VEGAN;VEGETARIAN,-,-,-,-
+ingredient,Pasta,200,grams,VEGETARIAN;NUT_FREE,-,-,-,-
+ingredient,Cheese,50,grams,VEGETARIAN,-,-,-,-
+instruction,-,-,-,-,Chop tomatoes,5,knife;board,True
+instruction,-,-,-,-,Boil water,10,pot,False
+instruction,-,-,-,-,Combine and cook,8,pan,Truetype,ingredient_name,quantity,unit,dietary_tags,instruction,prep_time,equipment,include_in_prep_time
+ingredient,Bread,2,slices,VEGETARIAN,-,-,-,-
+ingredient,Cheese,60,grams,VEGETARIAN,-,-,-,-
+instruction,-,-,-,-,Butter bread,2,knife,True
+instruction,-,-,-,-,Grill sandwich,6,grill,True
