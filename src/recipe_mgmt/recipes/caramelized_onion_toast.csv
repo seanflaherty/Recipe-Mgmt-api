@@ -1,0 +1,7 @@
+type,ingredient_name,quantity,unit,dietary_tags,instruction,prep_time,equipment,include_in_prep_time
+ingredient,Bread,3,slices,VEGETARIAN,-,-,-,-
+ingredient,Onion,1,pcs,VEGETARIAN,-,-,-,-
+ingredient,Cheese,40,grams,VEGETARIAN,-,-,-,-
+instruction,-,-,-,-,Toast bread,4,toaster,True
+instruction,-,-,-,-,Caramelize onion,10,pan,True
+instruction,-,-,-,-,Layer and melt,3,oven,True

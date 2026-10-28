@@ -1,0 +1,7 @@
+type,ingredient_name,quantity,unit,dietary_tags,instruction,prep_time,equipment,include_in_prep_time
+ingredient,Milk,200,ml,NUT_FREE,-,-,-,-
+ingredient,Pasta,100,grams,VEGETARIAN,-,-,-,-
+ingredient,Cheese,40,grams,VEGETARIAN,-,-,-,-
+instruction,-,-,-,-,Heat milk,5,pot,True
+instruction,-,-,-,-,Boil pasta,9,pot,False
+instruction,-,-,-,-,Mix and serve,3,spoon,True

@@ -1,0 +1,7 @@
+type,ingredient_name,quantity,unit,dietary_tags,instruction,prep_time,equipment,include_in_prep_time
+ingredient,Tomato,2,pcs,VEGAN,-,-,-,-
+ingredient,Milk,100,ml,NUT_FREE,-,-,-,-
+ingredient,Cheese,20,grams,VEGETARIAN,-,-,-,-
+instruction,-,-,-,-,Chop tomatoes,4,knife;board,True
+instruction,-,-,-,-,Simmer milk,6,pot,True
+instruction,-,-,-,-,Finish with cheese,2,grater,True
