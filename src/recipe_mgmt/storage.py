@@ -41,7 +41,7 @@ class CSVDataLoader(DataLoader[Recipe]):
     """Data loader implementation for reading and writing recipes via CSV files."""
 
     def load_data(self, source: str | Path, **kwargs: Any) -> Recipe:
-        """Load a single Recipe from a structured CSV file[cite: 3].
+        """Load a single Recipe from a structured CSV file.
 
         Args:
             source: Path to the CSV file.
@@ -130,6 +130,7 @@ class JSONDataLoader(DataLoader[Recipe]):
         Returns:
             A populated Recipe instance.
         """
+        raise NotImplementedError("JSON loading is not yet implemented.")
 
     def save_data(self, destination: str | Path, data: Recipe, **kwargs: Any) -> None:
         """Save a Recipe instance to a JSON destination.
@@ -139,7 +140,7 @@ class JSONDataLoader(DataLoader[Recipe]):
             data: The Recipe instance to save.
             **kwargs: Additional keyword arguments.
         """
-
+        raise NotImplementedError("JSON loading is not yet implemented.")
 
 def select_loader(file_extension: str) -> DataLoader[Any]:
     """Select and return an appropriate DataLoader instance based on file format.
