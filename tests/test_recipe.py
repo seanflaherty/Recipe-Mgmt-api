@@ -1,5 +1,4 @@
 """Unit tests for the recipe_mgmt.recipe module."""
-import pytest
 
 from recipe_mgmt.components import DietaryTag, Ingredient, RecipeIngredient
 from recipe_mgmt.recipe import Instruction, Recipe
@@ -66,7 +65,8 @@ def test_recipe_required_equipment() -> None:
 
 def test_recipe_get_dietary_tags() -> None:
     """Test the intersection of dietary tags across all recipe ingredients[cite: 6]."""
-    ing1 = Ingredient(name="Almond Flour", dietary_tags={DietaryTag.GLUTEN_FREE, DietaryTag.NUT_FREE})
+    ing1 = Ingredient(name="Almond Flour",
+                       dietary_tags={DietaryTag.GLUTEN_FREE, DietaryTag.NUT_FREE})
     ing2 = Ingredient(name="Rice Flour", dietary_tags={DietaryTag.GLUTEN_FREE})
 
     ri1 = RecipeIngredient(ing1, 1.0, "cup")
