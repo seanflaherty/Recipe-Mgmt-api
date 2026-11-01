@@ -5,8 +5,62 @@ info:
 paths:
   /recipes:
     get:
-      summary: Get all recipes
+      summary: Search or filter recipes
       operationId: recipe_mgmt.main.get_recipes
+      parameters:
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: ingredient
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: dietary_tag
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: max_prep_time
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         '200':
-          description: Successful response
+          description: A list of matching recipes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+    post:
+      summary: Add a recipe
+      operationId: recipe_mgmt.main.add_recipe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Recipe successfully created
+  /recipes/{name}:
+    delete:
+      summary: Delete a recipe by name
+      operationId: recipe_mgmt.main.delete_recipe
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Recipe deleted successfully
+        '404':
+          description: Recipe not found
