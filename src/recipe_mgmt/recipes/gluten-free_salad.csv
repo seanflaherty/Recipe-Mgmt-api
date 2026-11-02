@@ -1,0 +1,3 @@
+type,ingredient_name,dietary_tags,quantity,unit,instruction,prep_time,equipment,include_in_prep_time
+ingredient,Lettuce,gluten_free,1,head,,,,
+instruction,,,,,Wash greens,5,,True
