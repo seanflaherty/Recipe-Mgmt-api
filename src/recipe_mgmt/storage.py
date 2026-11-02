@@ -52,7 +52,7 @@ class CSVDataLoader(DataLoader[Recipe]):
         """
         filepath = Path(source)
         name = filepath.stem
-        name = name.replace("_", " ").title()  # Assumes file names use underscores[cite: 3]
+        name = name.replace("_", " ").title()
         ingredients: list[RecipeIngredient] = []
         instructions: list[Instruction] = []
 
@@ -114,7 +114,55 @@ class CSVDataLoader(DataLoader[Recipe]):
             data: The Recipe instance to save.
             **kwargs: Additional keyword arguments.
         """
-        # Implementation for saving CSV data
+        filepath = Path(destination)
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+
+        fieldnames = [
+            "type",
+            "ingredient_name",
+            "dietary_tags",
+            "quantity",
+            "unit",
+            "instruction",
+            "prep_time",
+            "equipment",
+            "include_in_prep_time",
+        ]
+
+        with filepath.open(mode="w", newline="", encoding="utf-8") as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+
+            # Write each recipe ingredient row
+            for ri in data.recipe_ingredients:
+                tags_str = ";".join(tag.value for tag in ri.ingredient.dietary_tags)
+                writer.writerow({
+                    "type": "ingredient",
+                    "ingredient_name": ri.ingredient.name,
+                    "dietary_tags": tags_str,
+                    "quantity": ri.quantity,
+                    "unit": ri.unit,
+                    "instruction": "",
+                    "prep_time": "",
+                    "equipment": "",
+                    "include_in_prep_time": "",
+                })
+
+            # Write each instruction row
+            for instr in data.instructions:
+                eq_str = ";".join(instr.equipment)
+                writer.writerow({
+                    "type": "instruction",
+                    "ingredient_name": "",
+                    "dietary_tags": "",
+                    "quantity": "",
+                    "unit": "",
+                    "instruction": instr.description,
+                    "prep_time": instr.prep_time,
+                    "equipment": eq_str,
+                    "include_in_prep_time": str(instr.include_in_prep_time),
+                })
+
 
 
 class JSONDataLoader(DataLoader[Recipe]):
@@ -133,14 +181,93 @@ class JSONDataLoader(DataLoader[Recipe]):
         raise NotImplementedError("JSON loading is not yet implemented.")
 
     def save_data(self, destination: str | Path, data: Recipe, **kwargs: Any) -> None:
-        """Save a Recipe instance to a JSON destination.
+        """Save a Recipe instance to a structured CSV destination.
 
         Args:
-            destination: Path where the JSON file should be written.
-            data: The Recipe instance to save.
+            destination: Path where the CSV file should be written.
+            data: The Recipe instance or dictionary-backed object to save.
             **kwargs: Additional keyword arguments.
         """
-        raise NotImplementedError("JSON loading is not yet implemented.")
+        filepath = Path(destination)
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+
+        fieldnames = [
+            "type",
+            "ingredient_name",
+            "dietary_tags",
+            "quantity",
+            "unit",
+            "instruction",
+            "prep_time",
+            "equipment",
+            "include_in_prep_time",
+        ]
+
+        with filepath.open(mode="w", newline="", encoding="utf-8") as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+
+            # Handle recipe ingredients (whether objects or raw dictionaries)
+            recipe_ingredients = getattr(data, "recipe_ingredients", [])
+            for ri in recipe_ingredients:
+                if isinstance(ri, dict):
+                    ing_data = ri.get("ingredient", {})
+                    if isinstance(ing_data, dict):
+                        ing_name = ing_data.get("name", "")
+                        raw_tags = ing_data.get("dietary_tags", [])
+                        tags_str = ";".join(
+                            t.get("name", "") if isinstance(t, dict) else str(t)
+                            for t in raw_tags
+                        )
+                    else:
+                        ing_name = str(ing_data)
+                        tags_str = ""
+                    quantity = ri.get("quantity", 0)
+                    unit = ri.get("unit", "")
+                else:
+                    tags_str = ";".join(tag.value for tag in ri.ingredient.dietary_tags)
+                    ing_name = ri.ingredient.name
+                    quantity = ri.quantity
+                    unit = ri.unit
+
+                writer.writerow({
+                    "type": "ingredient",
+                    "ingredient_name": ing_name,
+                    "dietary_tags": tags_str,
+                    "quantity": quantity,
+                    "unit": unit,
+                    "instruction": "",
+                    "prep_time": "",
+                    "equipment": "",
+                    "include_in_prep_time": "",
+                })
+
+            # Handle instructions (whether objects or raw dictionaries)
+            instructions = getattr(data, "instructions", [])
+            for instr in instructions:
+                if isinstance(instr, dict):
+                    desc = instr.get("description", "")
+                    prep_t = instr.get("prep_time", 0)
+                    eq_list = instr.get("equipment", [])
+                    eq_str = ";".join(eq_list) if isinstance(eq_list, list) else str(eq_list)
+                    inc_prep = str(instr.get("include_in_prep_time", True))
+                else:
+                    desc = instr.description
+                    prep_t = instr.prep_time
+                    eq_str = ";".join(instr.equipment)
+                    inc_prep = str(instr.include_in_prep_time)
+
+                writer.writerow({
+                    "type": "instruction",
+                    "ingredient_name": "",
+                    "dietary_tags": "",
+                    "quantity": "",
+                    "unit": "",
+                    "instruction": desc,
+                    "prep_time": prep_t,
+                    "equipment": eq_str,
+                    "include_in_prep_time": inc_prep,
+                })
 
 def select_loader(file_extension: str) -> DataLoader[Any]:
     """Select and return an appropriate DataLoader instance based on file format.
