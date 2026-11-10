@@ -9,6 +9,7 @@ import os
 import sys
 import connexion
 from connexion.options import SwaggerUIOptions
+import yaml
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(base_dir, 'src'))
@@ -26,6 +27,7 @@ def create_app():
                to handle incoming HTTP requests.
     """
     spec_dir = os.path.join(base_dir, 'src', 'recipe_mgmt')
+    spec_file = os.path.join(spec_dir, 'recipe_mgmt.openapi.yaml')
 
     # Define your environments cleanly here
     server_list = [
@@ -36,7 +38,8 @@ def create_app():
     # Configure Swagger UI
     swagger_options = SwaggerUIOptions(
         swagger_ui=True,
-        swagger_ui_path="/ui"
+        swagger_ui_path="/ui",
+        swagger_ui_config={"url": "/spec.json"},
     )
 
     # Initialize Connexion
@@ -48,6 +51,11 @@ def create_app():
 
     # Add the OpenAPI specification file
     connexion_app.add_api('recipe_mgmt.openapi.yaml')
+
+    @connexion_app.route("/spec.json")
+    def spec():
+        with open(spec_file) as f:
+            return yaml.safe_load(f)
 
    # Define fallback routes directly on the connexion_app wrapper
     @connexion_app.route("/")
