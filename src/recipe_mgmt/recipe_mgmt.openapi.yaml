@@ -2,6 +2,13 @@ openapi: 3.0.0
 info:
   title: Recipe Management API
   version: 1.0.0
+
+servers:
+  - url: http://localhost:8000
+    description: Local Development Server (Gunicorn/Uvicorn)
+  - url: https://recipe-mgmt-api.onrender.com
+    description: Production Server on Render
+
 paths:
   /recipes:
     get:
