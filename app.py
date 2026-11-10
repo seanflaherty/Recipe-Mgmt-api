@@ -29,7 +29,7 @@ def create_app():
 
     # Define your environments cleanly here
     server_list = [
-        {"url": "https://onrender.com", "description": "Production Server on Render"},
+        {"url": "https://recipe-mgmt-api.onrender.com", "description": "Production Server on Render"},
         {"url": "http://localhost:8000", "description": "Local Development Server"}
     ]
 
@@ -37,22 +37,9 @@ def create_app():
     swagger_options = SwaggerUIOptions(
         swagger_ui=True,
         swagger_ui_path="/ui",
+        # Pass just the servers configuration key to modify the UI frontend render tree
         swagger_ui_config={
-            "spec": {
-                "openapi": "3.0.3",
-                "info": {"title": "Recipe Management API", "version": "1.0.0"},
-                "servers": server_list,
-                # Link your paths dynamically so the interactive buttons execute properly
-                "paths": {
-                    "/recipes": {
-                        "get": {"summary": "Search or filter recipes", "operationId": "recipe_mgmt.main.get_recipes"},
-                        "post": {"summary": "Add a recipe", "operationId": "recipe_mgmt.main.add_recipe"}
-                    },
-                    "/recipes/{name}": {
-                        "delete": {"summary": "Delete a recipe by name", "operationId": "recipe_mgmt.main.delete_recipe"}
-                    }
-                }
-            }
+            "servers": server_list
         }
     )
 
