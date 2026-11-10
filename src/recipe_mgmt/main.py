@@ -1,12 +1,12 @@
 """Main application module for the Recipe Management API.
 
 This module initializes the Connexion 3.x application, loads the OpenAPI
-specification contract (`recipe_mgmt.openapi.yaml`)[cite: 3, 6], and defines the core HTTP
+specification contract (`recipe_mgmt.openapi.yaml`), and defines the core HTTP
 request handler functions (`get_recipes`, `add_recipe`, and `delete_recipe`).
 
-It acts as the bridge between the web interface (Swagger UI)[cite: 4, 7],
-the underlying domain logic (`RecipeBook`)[cite: 3], and disk persistence (`storage.py`)[cite: 10],
-exposing a fully-compatible ASGI `application` instance for Uvicorn[cite: 3].
+It acts as the bridge between the web interface (Swagger UI),
+the underlying domain logic (`RecipeBook`), and disk persistence (`storage.py`),
+exposing a fully-compatible ASGI `application` instance for Uvicorn.
 """
 from pathlib import Path
 import connexion
