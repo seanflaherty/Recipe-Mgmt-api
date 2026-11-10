@@ -4,10 +4,10 @@ info:
   version: 1.0.0
 
 servers:
+  - url: https://recipe-mgmt-api.onrender.com
+    description: Production Server on Render
   - url: http://localhost:8000
     description: Local Development Server
-  - url: https://onrender.com
-    description: Production Server on Render
 
 paths:
   /recipes:
