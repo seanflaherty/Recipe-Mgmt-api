@@ -121,9 +121,3 @@ def delete_recipe(name: str):
     except ValueError as e:
         return {"error": str(e)}, 404
 
-# Initialize Connexion App (compatible with Connexion 3.x)
-app = connexion.App(__name__, specification_dir="./")
-app.add_api("recipe_mgmt.openapi.yaml", options={"swagger_ui": True})
-
-# Expose the underlying ASGI application for Uvicorn
-application = app
