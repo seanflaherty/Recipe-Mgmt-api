@@ -28,7 +28,11 @@ def create_app():
     spec_dir = os.path.join(base_dir, 'src', 'recipe_mgmt')
 
     # Configure Swagger UI
-    swagger_options = SwaggerUIOptions(swagger_ui=True, swagger_ui_path="/ui")
+    swagger_options = SwaggerUIOptions(
+        swagger_ui=True,
+        swagger_ui_path="/ui",
+        swagger_ui_config={"configUrl": "/openapi.json"}
+    )
 
     # Initialize Connexion
     connexion_app = connexion.FlaskApp(
