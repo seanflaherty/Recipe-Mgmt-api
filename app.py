@@ -37,12 +37,12 @@ def create_app() -> Flask:
     # Get the underlying Flask instance
     flask_app = connexion_app.app
 
-    # Define the root route on the active Flask instance
-    @flask_app.route("/")
+   # Define fallback routes directly on the connexion_app wrapper
+    @connexion_app.route("/")
     def home():
         return "Hello recipes! (root)"
 
-    return flask_app
+    return connexion_app
 
 # Expose the application factory result for the WSGI production server
 app = create_app()
