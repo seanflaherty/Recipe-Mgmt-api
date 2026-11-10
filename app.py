@@ -34,13 +34,10 @@ def create_app():
     ]
 
     # Configure Swagger UI
+# Configure Swagger UI
     swagger_options = SwaggerUIOptions(
         swagger_ui=True,
-        swagger_ui_path="/ui",
-        # Pass just the servers configuration key to modify the UI frontend render tree
-        swagger_ui_config={
-            "servers": server_list
-        }
+        swagger_ui_path="/ui"
     )
 
     # Initialize Connexion
