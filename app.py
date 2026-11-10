@@ -7,6 +7,7 @@ the WSGI application interface for production deployment.
 """
 from flask import Flask
 import connexion
+from connexion.options import SwaggerUIOptions
 
 def create_app() -> Flask:
     """
@@ -21,8 +22,14 @@ def create_app() -> Flask:
                to handle incoming HTTP requests.
     """
 
+    # Configure Swagger UI
+    swagger_options = SwaggerUIOptions(swagger_ui=True, swagger_ui_path="/ui")
+
     # Initialize Connexion
-    connexion_app = connexion.FlaskApp(__name__, specification_dir='./src/recipe_mgmt/')
+    connexion_app = connexion.FlaskApp(
+        __name__, specification_dir='./src/recipe_mgmt/',
+        swagger_ui_options=swagger_options
+        )
 
     # Add the OpenAPI specification file
     connexion_app.add_api('recipe_mgmt.openapi.yaml')
