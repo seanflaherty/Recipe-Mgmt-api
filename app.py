@@ -27,10 +27,33 @@ def create_app():
     """
     spec_dir = os.path.join(base_dir, 'src', 'recipe_mgmt')
 
+    # Define your environments cleanly here
+    server_list = [
+        {"url": "https://onrender.com", "description": "Production Server on Render"},
+        {"url": "http://localhost:8000", "description": "Local Development Server"}
+    ]
+
     # Configure Swagger UI
     swagger_options = SwaggerUIOptions(
         swagger_ui=True,
         swagger_ui_path="/ui",
+        swagger_ui_config={
+            "spec": {
+                "openapi": "3.0.3",
+                "info": {"title": "Recipe Management API", "version": "1.0.0"},
+                "servers": server_list,
+                # Link your paths dynamically so the interactive buttons execute properly
+                "paths": {
+                    "/recipes": {
+                        "get": {"summary": "Search or filter recipes", "operationId": "recipe_mgmt.main.get_recipes"},
+                        "post": {"summary": "Add a recipe", "operationId": "recipe_mgmt.main.add_recipe"}
+                    },
+                    "/recipes/{name}": {
+                        "delete": {"summary": "Delete a recipe by name", "operationId": "recipe_mgmt.main.delete_recipe"}
+                    }
+                }
+            }
+        }
     )
 
     # Initialize Connexion
@@ -41,15 +64,7 @@ def create_app():
     )
 
     # Add the OpenAPI specification file
-    connexion_app.add_api(
-        'recipe_mgmt.openapi.yaml',
-        arguments={
-            "servers": [
-                {"url": "https://recipe-mgmt-api.onrender.com", "description": "Production Server on Render"},
-                {"url": "http://localhost:8000", "description": "Local Development Server"}
-            ]
-        }
-    )
+    connexion_app.add_api('recipe_mgmt.openapi.yaml')
 
    # Define fallback routes directly on the connexion_app wrapper
     @connexion_app.route("/")
