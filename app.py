@@ -22,7 +22,7 @@ def create_app() -> Flask:
     """
 
     # Initialize Connexion
-    connexion_app = connexion.FlaskApp(__name__, specification_dir='./')
+    connexion_app = connexion.FlaskApp(__name__, specification_dir='./src/recipe_mgmt/')
 
     # Add the OpenAPI specification file
     connexion_app.add_api('recipe_mgmt.openapi.yaml')
