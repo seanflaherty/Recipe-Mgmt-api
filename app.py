@@ -41,7 +41,15 @@ def create_app():
     )
 
     # Add the OpenAPI specification file
-    connexion_app.add_api('recipe_mgmt.openapi.yaml')
+    connexion_app.add_api(
+        'recipe_mgmt.openapi.yaml',
+        arguments={
+            "servers": [
+                {"url": "https://recipe-mgmt-api.onrender.com", "description": "Production Server on Render"},
+                {"url": "http://localhost:8000", "description": "Local Development Server"}
+            ]
+        }
+    )
 
    # Define fallback routes directly on the connexion_app wrapper
     @connexion_app.route("/")
