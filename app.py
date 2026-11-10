@@ -31,7 +31,6 @@ def create_app():
     swagger_options = SwaggerUIOptions(
         swagger_ui=True,
         swagger_ui_path="/ui",
-        swagger_ui_config={"configUrl": "/openapi.json"}
     )
 
     # Initialize Connexion
