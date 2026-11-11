@@ -1,68 +1,22 @@
 """
 Recipe Management Application Entry Point.
 
-This module initializes and configures the Flask application using Connexion
-to map OpenAPI 3.0 specifications to Python handler functions. It exposes
-the WSGI application interface for production deployment.
+This module initializes and configures the FastAPI application instance,
+setting up sys.path adjustments and exposing the core ASGI application
+interface for production servers.
 """
+
 import os
 import sys
-import connexion
-from connexion.options import SwaggerUIOptions
-import yaml
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(base_dir, 'src'))
+sys.path.insert(0, os.path.join(base_dir, "src"))
 
-def create_app():
-    """
-    Application factory that initializes the Connexion and Flask framework instances.
+# Import the FastAPI app instance from the main module
+from recipe_mgmt.main import app
 
-    This function configures the routing engine by loading the OpenAPI specification
-    file, registers foundational fallback utility routes (like the root health check),
-    and extracts the underlying WSGI Flask instance required by production servers.
 
-    Returns:
-        Flask: A fully configured and initialized Flask application instance ready
-               to handle incoming HTTP requests.
-    """
-    spec_dir = os.path.join(base_dir, 'src', 'recipe_mgmt')
-    spec_file = os.path.join(spec_dir, 'recipe_mgmt.openapi.yaml')
-
-    # Define your environments cleanly here
-    server_list = [
-        {"url": "https://recipe-mgmt-api.onrender.com", "description": "Production Server on Render"},
-        {"url": "http://localhost:8000", "description": "Local Development Server"}
-    ]
-
-    # Configure Swagger UI
-    swagger_options = SwaggerUIOptions(
-        swagger_ui=True,
-        swagger_ui_path="/ui",
-        swagger_ui_config={"url": "/spec.json"},
-    )
-
-    # Initialize Connexion
-    connexion_app = connexion.FlaskApp(
-        __name__,
-        specification_dir=spec_dir,
-        swagger_ui_options=swagger_options
-    )
-
-    # Add the OpenAPI specification file
-    connexion_app.add_api('recipe_mgmt.openapi.yaml')
-
-    @connexion_app.route("/spec.json")
-    def spec():
-        with open(spec_file) as f:
-            return yaml.safe_load(f)
-
-   # Define fallback routes directly on the connexion_app wrapper
-    @connexion_app.route("/")
-    def home():
-        return "Hello recipes! (root)"
-
-    return connexion_app
-
-# Expose the application factory result for the WSGI production server
-app = create_app()
+@app.get("/")
+def home():
+    """Root health check endpoint."""
+    return {"message": "Hello recipes! (root)"}
