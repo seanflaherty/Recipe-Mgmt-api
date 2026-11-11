@@ -42,16 +42,7 @@ def get_recipes(
         max_prep_time=max_prep_time,
     )
 
-    recipe_list = []
-    for recipe in results:
-        if hasattr(recipe, "model_dump"):
-            recipe_list.append(recipe.model_dump())
-        elif hasattr(recipe, "dict"):
-            recipe_list.append(recipe.dict())
-        else:
-            recipe_list.append(vars(recipe))
-
-    return recipe_list
+    return [recipe.to_dict() for recipe in results]
 
 
 @app.post("/recipes", status_code=201, summary="Add a recipe")
