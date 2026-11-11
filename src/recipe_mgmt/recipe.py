@@ -1,8 +1,11 @@
 """A module containing the Recipe and related classes."""
+
 from recipe_mgmt.components import RecipeIngredient
+
 
 class Instruction:
     """A single step or instruction in a recipe."""
+
     def __init__(
         self,
         description: str,
@@ -16,16 +19,29 @@ class Instruction:
         self.include_in_prep_time = include_in_prep_time
 
     def __repr__(self) -> str:
-        return (f"{type(self).__name__}({self.description!r}, {self.prep_time!r}, "
-                f"{self.equipment!r}, {self.include_in_prep_time!r})")
+        return (
+            f"{type(self).__name__}({self.description!r}, {self.prep_time!r}, "
+            f"{self.equipment!r}, {self.include_in_prep_time!r})"
+        )
 
     def __str__(self) -> str:
-        return (f"{self.description} (Prep time: {self.prep_time} minutes, Equipment: "
-                f"{', '.join(self.equipment)})")
+        return (
+            f"{self.description} (Prep time: {self.prep_time} minutes, Equipment: "
+            f"{', '.join(self.equipment)})"
+        )
+
+    def to_dict(self) -> dict:
+        return {
+            "description": self.description,
+            "prep_time": self.prep_time,
+            "equipment": self.equipment,
+            "include_in_prep_time": self.include_in_prep_time,
+        }
 
 
 class Recipe:
     """Recipe class."""
+
     def __init__(
         self,
         name: str,
@@ -34,11 +50,15 @@ class Recipe:
     ) -> None:
         self.name = name
         self.recipe_ingredients = recipe_ingredients
-        self.instructions: list[Instruction] = instructions if instructions is not None else []
+        self.instructions: list[Instruction] = (
+            instructions if instructions is not None else []
+        )
 
     def __repr__(self):
-        return (f"{type(self).__name__}({self.name!r}, {self.recipe_ingredients!r}, "
-                f"{self.instructions!r})")
+        return (
+            f"{type(self).__name__}({self.name!r}, {self.recipe_ingredients!r}, "
+            f"{self.instructions!r})"
+        )
 
     def __str__(self):
         return self.name
@@ -73,3 +93,25 @@ class Recipe:
             ingredient_name.lower() in ri.ingredient.name.lower()
             for ri in self.recipe_ingredients
         )
+
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "total_prep_time": self.total_prep_time,
+            "required_equipment": list(self.required_equipment),
+            "dietary_tags": [tag.name for tag in self.get_dietary_tags()],
+            "recipe_ingredients": [
+                {
+                    "quantity": ri.quantity,
+                    "unit": ri.unit,
+                    "ingredient": {
+                        "name": ri.ingredient.name,
+                        "dietary_tags": [
+                            tag.name for tag in ri.ingredient.dietary_tags
+                        ],
+                    },
+                }
+                for ri in self.recipe_ingredients
+            ],
+            "instructions": [ins.to_dict() for ins in self.instructions],
+        }
