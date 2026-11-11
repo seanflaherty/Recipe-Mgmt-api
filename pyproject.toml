@@ -18,6 +18,8 @@ connexion = { version = ">=3.2.0,<4.0.0", extras = ["swagger-ui", "flask"] }  # 
 jsonschema = "<4.18.0"
 pydantic = ">=2.14.2,<3.0.0"
 gunicorn = "^27.0.0"
+sqlalchemy = "^2.1.8"
+psycopg2-binary = "^2.9.13"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.2.0"
