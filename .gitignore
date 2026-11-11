@@ -9,5 +9,8 @@ __pycache__/
 .venv
 myenv/
 
+# Databases
+*.db
+
 # vs code
 .vscode/
