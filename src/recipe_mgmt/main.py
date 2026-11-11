@@ -8,6 +8,7 @@ managing in-memory state and disk persistence (`storage.py`).
 from pathlib import Path
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from recipe_mgmt.components import DietaryTag, Ingredient, RecipeIngredient
@@ -25,6 +26,17 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/ui",  # Keeps the UI path.
     redoc_url=None,
+)
+
+# CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "*"
+    ],  # Allows all origins (adjust to specific domains in production)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all HTTP methods (GET, POST, DELETE, etc.)
+    allow_headers=["*"],  # Allows all headers
 )
 
 
@@ -53,6 +65,23 @@ class RecipeCreateSchema(BaseModel):
     name: str = Field(..., example="Homemade Bread")
     recipe_ingredients: List[RecipeIngredientSchema] = []
     instructions: List[InstructionSchema] = []
+
+
+class RecipeRowSchema(BaseModel):
+    type: str = Field(..., example="ingredient")  # "ingredient" or "instruction"
+    ingredient_name: Optional[str] = Field(None, example="Bread")
+    quantity: Optional[float] = Field(None, example=3.0)
+    unit: Optional[str] = Field(None, example="slices")
+    dietary_tags: Optional[str] = Field(None, example="VEGETARIAN")
+    instruction: Optional[str] = Field(None, example="-")
+    prep_time: Optional[int] = Field(None, example=0)
+    equipment: Optional[str] = Field(None, example="-")
+    include_in_prep_time: Optional[bool] = Field(True, example=True)
+
+
+class FlatRecipeImportSchema(BaseModel):
+    recipe_name: str = Field(..., example="Caramelized Onion Toast")
+    rows: List[RecipeRowSchema]
 
 
 # Initialize a shared RecipeBook instance for the app
@@ -167,3 +196,74 @@ def delete_recipe(name: str):
         return {"message": f"Recipe '{name}' deleted successfully"}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.post(
+    "/recipes/import-flat",
+    status_code=201,
+    summary="Add recipe using flat tabular rows",
+)
+def import_flat_recipe(payload: FlatRecipeImportSchema, db: Session = Depends(get_db)):
+    """Accepts a recipe name and a list of tabular rows (ingredients/instructions)
+    and saves them directly to PostgreSQL or SQLite.
+    """
+    try:
+        existing = (
+            db.query(RecipeModel)
+            .filter(RecipeModel.name == payload.recipe_name)
+            .first()
+        )
+        if existing:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Recipe '{payload.recipe_name}' already exists.",
+            )
+
+        db_recipe = RecipeModel(name=payload.recipe_name)
+
+        for row in payload.rows:
+            if (
+                row.type.lower() == "ingredient"
+                and row.ingredient_name
+                and row.ingredient_name != "-"
+            ):
+                db_recipe.ingredients.append(
+                    RecipeIngredientModel(
+                        ingredient_name=row.ingredient_name,
+                        quantity=row.quantity or 1.0,
+                        unit=row.unit or "",
+                        dietary_tags=row.dietary_tags or "",
+                    )
+                )
+            elif (
+                row.type.lower() == "instruction"
+                and row.instruction
+                and row.instruction != "-"
+            ):
+                db_recipe.instructions.append(
+                    InstructionModel(
+                        description=row.instruction,
+                        prep_time=row.prep_time or 0,
+                        include_in_prep_time=(
+                            row.include_in_prep_time
+                            if row.include_in_prep_time is not None
+                            else True
+                        ),
+                    )
+                )
+
+        db.add(db_recipe)
+        db.commit()
+        db.refresh(db_recipe)
+
+        return {
+            "message": "Flat recipe imported and saved successfully!",
+            "id": db_recipe.id,
+            "name": db_recipe.name,
+            "ingredients_added": len(db_recipe.ingredients),
+            "instructions_added": len(db_recipe.instructions),
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
