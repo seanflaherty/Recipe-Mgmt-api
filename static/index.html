@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Management Dashboard</title>
+
+    <!-- 1. Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 2. HTMX CDN -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"
+        integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc09BN2XoEG1ffH0W1TIFGBBvP3aiF32FkIF"
+        crossorigin="anonymous"></script>
+
+    <!-- 3. HTMX JSON Encoding Extension (Optional, useful if posting raw JSON to your API) -->
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen p-6">
+
+    <div class="max-w-4xl mx-auto space-y-8">
+        <!-- Header -->
+        <header class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h1 class="text-3xl font-bold text-emerald-600">🍳 Recipe Manager</h1>
+            <p class="text-gray-500 text-sm mt-1">Powered by FastAPI/Connexion, Tailwind, and HTMX</p>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+            <!-- Section: Add Recipe Form -->
+            <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Add a New Recipe</h2>
+
+                <!-- HTMX Form POST with JSON encoding extension -->
+                <form hx-post="http://127.0.0.1:8000/recipes" hx-ext="json-enc" hx-target="#result-message"
+                    class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Recipe Name</label>
+                        <input type="text" name="name" placeholder="e.g. Garden Salad" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition">
+                        Save Recipe
+                    </button>
+                </form>
+
+                <!-- Feedback target container -->
+                <div id="result-message" class="mt-4 text-sm"></div>
+            </section>
+
+            <!-- Section: Recipe List -->
+            <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Recipe Book</h2>
+
+                <!-- HTMX GET trigger on page load -->
+                <div hx-get="http://127.0.0.1:8000/recipes" hx-trigger="load" hx-swap="innerHTML"
+                    class="text-gray-500 italic">
+                    Loading recipes...
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+</body>
+
+</html>
