@@ -19,7 +19,7 @@ if not DATABASE_URL:
 # For PostGreSQL?
 connect_args = {"check_same_thread": False}
 
-engine = create_engine(DATABASE_URL, connect_args=connect_args, echo=False)
+engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
