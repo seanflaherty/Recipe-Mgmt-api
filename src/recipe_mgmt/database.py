@@ -3,12 +3,21 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+from dotenv import load_dotenv
 
-# Default to SQLite if DATABASE_URL is not set in environment variables
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///recipes.db")
+load_dotenv()
+
+# Get the DATABASE_URL environment variable from .env file.
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is not set")
 
 # Configure engine (handle SQLite specific thread check if needed)
-connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+# connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+
+# For PostGreSQL?
+connect_args = {"check_same_thread": False}
 
 engine = create_engine(DATABASE_URL, connect_args=connect_args, echo=False)
 
