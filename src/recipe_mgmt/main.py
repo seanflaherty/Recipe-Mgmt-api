@@ -8,6 +8,7 @@ managing in-memory state and disk persistence (`storage.py`).
 from pathlib import Path
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from recipe_mgmt.components import DietaryTag, Ingredient, RecipeIngredient
@@ -167,3 +168,8 @@ def delete_recipe(name: str):
         return {"message": f"Recipe '{name}' deleted successfully"}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+        # SCF Mount the "static" folder to the root URL
+
+
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
