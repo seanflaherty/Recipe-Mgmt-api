@@ -13,9 +13,6 @@
     <script src="https://unpkg.com/htmx.org@1.9.12"
         integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc09BN2XoEG1ffH0W1TIFGBBvP3aiF32FkIF"
         crossorigin="anonymous"></script>
-
-    <!-- 3. HTMX JSON Encoding Extension (Optional, useful if posting raw JSON to your API) -->
-    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
 </head>
 
 <body class="bg-gray-50 text-gray-800 min-h-screen p-6">
@@ -24,7 +21,7 @@
         <!-- Header -->
         <header class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h1 class="text-3xl font-bold text-emerald-600">🍳 Recipe Manager</h1>
-            <p class="text-gray-500 text-sm mt-1">Powered by FastAPI/Connexion, Tailwind, and HTMX</p>
+            <p class="text-gray-500 text-sm mt-1">Powered by FastAPI, Tailwind, and HTMX</p>
         </header>
 
         <!-- Main Content Grid -->
@@ -32,43 +29,63 @@
 
             <!-- Section: Add Recipe Form -->
             <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700">Add a New Recipe (JSON)</h2>
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Add a New Recipe</h2>
 
-                <!-- HTMX Form POST with JSON encoding extension -->
-                <form hx-post="http://127.0.0.1:8000/recipes" hx-ext="json-enc" hx-target="#result-message"
-                    hx-swap="innerHTML" class="space-y-4">
-
+                <form id="recipe-form" onsubmit="submitRecipe(event)" class="space-y-4">
+                    <!-- Recipe Name -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Recipe JSON Payload</label>
-                        <p class="text-xs text-gray-400 mb-2">Paste or write the recipe structure matching your schema.
-                        </p>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Recipe Name</label>
+                        <input type="text" id="recipe-name" placeholder="e.g. Homemade Bread" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none text-sm">
+                    </div>
 
-                        <textarea name="recipe_payload" rows="10" required
-                            class="w-full font-mono text-xs px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">{
-  "name": "Homemade Bread",
-  "recipe_ingredients": [
-    {
-      "ingredient": {
-        "name": "Flour",
-        "dietary_tags": ["VEGAN"]
-      },
-      "quantity": 3.0,
-      "unit": "cups"
-    }
-  ],
-  "instructions": [
-    {
-      "description": "Mix flour and water in a bowl.",
-      "prep_time": 10,
-      "equipment": ["mixing bowl"],
-      "include_in_prep_time": true
-    }
-  ]
-}</textarea>
+                    <!-- Ingredient Details -->
+                    <div class="border-t pt-3 space-y-3">
+                        <h3 class="text-sm font-semibold text-gray-700">Main Ingredient</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Ingredient Name</label>
+                                <input type="text" id="ing-name" placeholder="e.g. Flour" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Dietary Tags
+                                    (comma-separated)</label>
+                                <input type="text" id="ing-tags" placeholder="e.g. VEGAN, GLUTEN"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Quantity</label>
+                                <input type="number" step="0.1" id="ing-quantity" value="1.0" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Unit</label>
+                                <input type="text" id="ing-unit" placeholder="e.g. cups"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instruction Details -->
+                    <div class="border-t pt-3 space-y-3">
+                        <h3 class="text-sm font-semibold text-gray-700">First Instruction Step</h3>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Description</label>
+                            <input type="text" id="ins-description" placeholder="e.g. Mix ingredients in a bowl."
+                                required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Prep Time (minutes)</label>
+                            <input type="number" id="ins-prep-time" value="5" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
                     </div>
 
                     <button type="submit"
-                        class="w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition">
+                        class="w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition text-sm">
                         Save Recipe to Database
                     </button>
                 </form>
@@ -81,7 +98,6 @@
             <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold text-gray-700">Recipe Book</h2>
-                    <!-- Optional: Refresh button to manually reload recipes via HTMX -->
                     <button hx-get="http://127.0.0.1:8000/recipes-db" hx-target="#recipe-list-container"
                         hx-swap="innerHTML"
                         class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition">
@@ -99,6 +115,68 @@
         </div>
     </div>
 
+    <!-- Script to bundle form fields into FastAPI's expected JSON structure -->
+    <script>
+        async function submitRecipe(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('recipe-name').value;
+            const ingName = document.getElementById('ing-name').value;
+            const ingTagsRaw = document.getElementById('ing-tags').value;
+            const dietaryTags = ingTagsRaw ? ingTagsRaw.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
+            const quantity = parseFloat(document.getElementById('ing-quantity').value);
+            const unit = document.getElementById('ing-unit').value;
+
+            const description = document.getElementById('ins-description').value;
+            const prepTime = parseInt(document.getElementById('ins-prep-time').value, 10);
+
+            const payload = {
+                name: name,
+                recipe_ingredients: [
+                    {
+                        ingredient: {
+                            name: ingName,
+                            dietary_tags: dietaryTags
+                        },
+                        quantity: quantity,
+                        unit: unit
+                    }
+                ],
+                instructions: [
+                    {
+                        description: description,
+                        prep_time: prepTime,
+                        equipment: [],
+                        include_in_prep_time: true
+                    }
+                ]
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/recipes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                const resultDiv = document.getElementById('result-message');
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class='p-3 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200 text-xs'>${result.message}</div>`;
+                    // Trigger HTMX to refresh the recipe list container automatically
+                    htmx.ajax('GET', 'http://127.0.0.1:8000/recipes-db', '#recipe-list-container');
+                    document.getElementById('recipe-form').reset();
+                } else {
+                    resultDiv.innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Error: ${result.detail || 'Failed to save'}</div>`;
+                }
+            } catch (err) {
+                document.getElementById('result-message').innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Network error: ${err.message}</div>`;
+            }
+        }
+    </script>
 </body>
 
 </html>
