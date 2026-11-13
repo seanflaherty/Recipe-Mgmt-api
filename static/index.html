@@ -32,20 +32,44 @@
 
             <!-- Section: Add Recipe Form -->
             <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700">Add a New Recipe</h2>
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Add a New Recipe (JSON)</h2>
 
                 <!-- HTMX Form POST with JSON encoding extension -->
                 <form hx-post="http://127.0.0.1:8000/recipes" hx-ext="json-enc" hx-target="#result-message"
-                    class="space-y-4">
+                    hx-swap="innerHTML" class="space-y-4">
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Recipe Name</label>
-                        <input type="text" name="name" placeholder="e.g. Garden Salad" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Recipe JSON Payload</label>
+                        <p class="text-xs text-gray-400 mb-2">Paste or write the recipe structure matching your schema.
+                        </p>
+
+                        <textarea name="recipe_payload" rows="10" required
+                            class="w-full font-mono text-xs px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">{
+  "name": "Homemade Bread",
+  "recipe_ingredients": [
+    {
+      "ingredient": {
+        "name": "Flour",
+        "dietary_tags": ["VEGAN"]
+      },
+      "quantity": 3.0,
+      "unit": "cups"
+    }
+  ],
+  "instructions": [
+    {
+      "description": "Mix flour and water in a bowl.",
+      "prep_time": 10,
+      "equipment": ["mixing bowl"],
+      "include_in_prep_time": true
+    }
+  ]
+}</textarea>
                     </div>
 
                     <button type="submit"
                         class="w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition">
-                        Save Recipe
+                        Save Recipe to Database
                     </button>
                 </form>
 
