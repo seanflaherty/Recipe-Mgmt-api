@@ -55,12 +55,20 @@
 
             <!-- Section: Recipe List -->
             <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700">Recipe Book</h2>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-700">Recipe Book</h2>
+                    <!-- Optional: Refresh button to manually reload recipes via HTMX -->
+                    <button hx-get="http://127.0.0.1:8000/recipes-db" hx-target="#recipe-list-container"
+                        hx-swap="innerHTML"
+                        class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition">
+                        Refresh List
+                    </button>
+                </div>
 
                 <!-- HTMX GET trigger on page load -->
-                <div hx-get="http://127.0.0.1:8000/recipes" hx-trigger="load" hx-swap="innerHTML"
-                    class="text-gray-500 italic">
-                    Loading recipes...
+                <div id="recipe-list-container" hx-get="http://127.0.0.1:8000/recipes-db" hx-trigger="load"
+                    hx-swap="innerHTML" class="text-gray-500 italic">
+                    Loading recipes from database...
                 </div>
             </section>
 
