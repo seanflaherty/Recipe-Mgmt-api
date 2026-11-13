@@ -98,6 +98,8 @@
             <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold text-gray-700">Recipe Book</h2>
+
+                    <!-- Refresh List Button powered by HTMX -->
                     <button hx-get="/recipes-db" hx-target="#recipe-list-container" hx-swap="innerHTML"
                         class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition">
                         Refresh List
@@ -106,7 +108,7 @@
 
                 <!-- HTMX GET trigger on page load -->
                 <div id="recipe-list-container" hx-get="/recipes-db" hx-trigger="load" hx-swap="innerHTML"
-                    class="text-gray-500 italic">
+                    class="text-gray-500 italic text-sm">
                     Loading recipes from database...
                 </div>
             </section>
