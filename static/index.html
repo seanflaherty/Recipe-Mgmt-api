@@ -251,6 +251,24 @@
         function closeRecipeModal() {
             document.getElementById('recipe-modal').classList.add('hidden');
         }
+
+        // Function to fetch and render the recipe list
+        async function loadRecipes() {
+            const container = document.getElementById('recipe-list-container');
+            container.innerHTML = "<p class='text-gray-400 italic text-sm'>Loading recipes from database...</p>";
+
+            try {
+                const response = await fetch('/recipes-db');
+                const htmlContent = await response.text();
+                container.innerHTML = htmlContent;
+            } catch (err) {
+                container.innerHTML = `<p class='text-red-500 text-xs'>Failed to load recipes: ${err.message}</p>`;
+            }
+        }
+
+        // Automatically load recipes when the page loads
+        window.addEventListener('DOMContentLoaded', loadRecipes);
+
     </script>
 </body>
 
