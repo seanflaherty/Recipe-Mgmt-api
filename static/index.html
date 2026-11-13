@@ -114,7 +114,30 @@
         </div>
     </div>
 
-    <!-- Script to bundle form fields into FastAPI's expected JSON structure -->
+    <!-- Recipe Details Modal (Pop-up Window) -->
+    <div id="recipe-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl max-w-lg w-full p-6 space-y-4 shadow-xl relative">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 id="modal-title" class="text-xl font-bold text-emerald-700">Recipe Details</h3>
+                <button onclick="closeRecipeModal()"
+                    class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+            </div>
+
+            <div id="modal-content" class="space-y-4 text-sm text-gray-600 max-h-96 overflow-y-auto">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <div class="flex justify-end pt-3 border-t">
+                <button onclick="closeRecipeModal()"
+                    class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script to handle form submission and recipe modal pop-up -->
     <script>
         async function submitRecipe(event) {
             event.preventDefault();
@@ -154,9 +177,7 @@
             try {
                 const response = await fetch('/recipes', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
@@ -166,7 +187,7 @@
                 if (response.ok) {
                     resultDiv.innerHTML = `<div class='p-3 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200 text-xs'>${result.message}</div>`;
 
-                    // Refresh the recipe list using standard fetch instead of htmx.ajax
+                    // Refresh recipe list
                     const listResponse = await fetch('/recipes-db');
                     const listHtml = await listResponse.text();
                     document.getElementById('recipe-list-container').innerHTML = listHtml;
@@ -178,6 +199,55 @@
             } catch (err) {
                 document.getElementById('result-message').innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Network error: ${err.message}</div>`;
             }
+        }
+
+        // Functions to open and populate the modal with recipe details
+        function openRecipeModal(button) {
+            const modal = document.getElementById('recipe-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalContent = document.getElementById('modal-content');
+
+            // Parse the JSON data embedded in the button's data-recipe attribute
+            const recipeData = JSON.parse(button.getAttribute('data-recipe'));
+
+            modalTitle.innerText = recipeData.name;
+
+            // Build ingredients list HTML
+            let ingredientsHtml = '<h4 class="font-semibold text-gray-700 mt-2">Ingredients:</h4><ul class="list-disc list-inside space-y-1 text-sm">';
+            if (recipeData.ingredients && recipeData.ingredients.length > 0) {
+                recipeData.ingredients.forEach(ing => {
+                    const tags = ing.dietary_tags && ing.dietary_tags.length > 0 ? ` <span class="text-xs bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded">${ing.dietary_tags.join(', ')}</span>` : '';
+                    ingredientsHtml += `<li>${ing.quantity} ${ing.unit} ${ing.name}${tags}</li>`;
+                });
+            } else {
+                ingredientsHtml += '<li class="text-gray-400 italic">No ingredients listed.</li>';
+            }
+            ingredientsHtml += '</ul>';
+
+            // Build instructions list HTML
+            let instructionsHtml = '<h4 class="font-semibold text-gray-700 mt-4">Instructions:</h4><ol class="list-decimal list-inside space-y-2 text-sm">';
+            if (recipeData.instructions && recipeData.instructions.length > 0) {
+                recipeData.instructions.forEach(ins => {
+                    instructionsHtml += `<li>${ins.description} <span class="text-xs text-gray-400">(Prep: ${ins.prep_time} mins)</span></li>`;
+                });
+            } else {
+                instructionsHtml += '<li class="text-gray-400 italic">No instructions listed.</li>';
+            }
+            instructionsHtml += '</ol>';
+
+            // Render inside modal content container
+            modalContent.innerHTML = `
+        <p class="text-sm"><strong>Total Prep Time:</strong> ${recipeData.total_prep_time} minutes</p>
+        ${ingredientsHtml}
+        ${instructionsHtml}
+    `;
+
+            // Show the modal
+            modal.classList.remove('hidden');
+        }
+
+        function closeRecipeModal() {
+            document.getElementById('recipe-modal').classList.add('hidden');
         }
     </script>
 </body>

@@ -7,7 +7,9 @@ managing in-memory state and disk persistence (`storage.py`).
 
 from pathlib import Path
 from typing import List, Optional
+import json
 from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -65,33 +67,65 @@ def get_db_recipes(
     name: Optional[str] = Query(
         None, description="Filter by recipe name (partial match)"
     ),
-    max_prep_time: Optional[int] = Query(
-        None, description="Filter by maximum preparation time in minutes"
-    ),
     db: Session = Depends(get_db),
 ):
-    """Fetch all recipes from the configured database with optional query filters."""
+    """Fetch all recipes from the database and return formatted HTML links containing recipe JSON data."""
     query = db.query(RecipeModel)
-
-    # Apply name filter if provided (case-insensitive substring match)
     if name:
         query = query.filter(RecipeModel.name.ilike(f"%{name}%"))
 
-    # Apply max prep time filter if provided (assuming your RecipeModel has a prep_time column)
-    if max_prep_time is not None:
-        query = query.filter(RecipeModel.prep_time <= max_prep_time)
-
     recipes = query.all()
 
-    # Return serialized database records
-    return [
-        {
-            "id": r.id,
+    if not recipes:
+        return "<p class='text-gray-400 italic text-sm'>No recipes found in the database.</p>"
+
+    html_output = "<ul class='divide-y divide-gray-100 space-y-2'>"
+    for r in recipes:
+        total_prep = sum(
+            ins.prep_time for ins in r.instructions if ins.include_in_prep_time
+        )
+
+        # Build dictionary containing all recipe fields
+        recipe_dict = {
             "name": r.name,
-            # TODO Include other model attributes as needed
+            "total_prep_time": total_prep,
+            "ingredients": [
+                {
+                    "name": ing.ingredient_name,
+                    "quantity": ing.quantity,
+                    "unit": ing.unit,
+                    "dietary_tags": (
+                        ing.dietary_tags.split(",") if ing.dietary_tags else []
+                    ),
+                }
+                for ing in r.ingredients
+            ],
+            "instructions": [
+                {
+                    "description": ins.description,
+                    "prep_time": ins.prep_time,
+                    "include_in_prep_time": ins.include_in_prep_time,
+                }
+                for ins in r.instructions
+            ],
         }
-        for r in recipes
-    ]
+
+        # Convert dictionary to a compact JSON string
+        recipe_json = json.dumps(recipe_dict)
+
+        html_output += f"""
+        <li class='py-2 flex justify-between items-center'>
+            <button onclick='openRecipeModal(this)'
+                    data-recipe='{recipe_json}'
+                    class='text-emerald-600 font-medium hover:text-emerald-800 hover:underline text-left text-sm transition'>
+                🍳 {r.name}
+            </button>
+            <span class='text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full'>⏱️ {total_prep} mins</span>
+        </li>
+        """
+    html_output += "</ul>"
+
+    return HTMLResponse(content=html_output)
 
 
 @app.post("/recipes", status_code=201, summary="Add a recipe to the database")
