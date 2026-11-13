@@ -9,7 +9,7 @@
     <!-- 1. Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- 2. HTMX CDN -->
+    <!-- 2. HTMX CDN with integrity check -->
     <script src="https://unpkg.com/htmx.org@1.9.12"
         integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc09BN2XoEG1ffH0W1TIFGBBvP3aiF32FkIF"
         crossorigin="anonymous"></script>
@@ -165,8 +165,12 @@
 
                 if (response.ok) {
                     resultDiv.innerHTML = `<div class='p-3 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200 text-xs'>${result.message}</div>`;
-                    // Trigger HTMX to refresh the recipe list container automatically
-                    htmx.ajax('GET', '/recipes-db', '#recipe-list-container');
+
+                    // Refresh the recipe list using standard fetch instead of htmx.ajax
+                    const listResponse = await fetch('/recipes-db');
+                    const listHtml = await listResponse.text();
+                    document.getElementById('recipe-list-container').innerHTML = listHtml;
+
                     document.getElementById('recipe-form').reset();
                 } else {
                     resultDiv.innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Error: ${result.detail || 'Failed to save'}</div>`;
