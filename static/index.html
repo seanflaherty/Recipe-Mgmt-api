@@ -251,11 +251,24 @@
             event.preventDefault();
 
             const name = document.getElementById('recipe-name').value;
-            const ingName = document.getElementById('ing-name').value;
-            const ingTagsRaw = document.getElementById('ing-tags').value;
-            const dietaryTags = ingTagsRaw ? ingTagsRaw.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
-            const quantity = parseFloat(document.getElementById('ing-quantity').value);
-            const unit = document.getElementById('ing-unit').value;
+
+            // Collect all ingredient rows dynamically
+            const ingredientRows = document.querySelectorAll('.ingredient-row');
+            const ingredients = [];
+            ingredientRows.forEach(row => {
+                const ingredientName = row.querySelector('.ing-name').value;
+                const dietaryTagsRaw = row.querySelector('.ins-tags').value;
+                const dietaryTags = dietaryTagsRaw ? dietaryTagsRaw.split(',').map(e => e.trim()).filter(e => e.length > 0) : [];
+                const quantity = parseInt(row.querySelector('.ing-quantity').value, 10);
+                const unit = parseInt(row.querySelector('.ing-unit').value, 10);
+
+                ingredients.push({
+                    name: ingredientName,
+                    dietary_tags: dietaryTags,
+                    quantity: quantity,
+                    unit: unit
+                });
+            });
 
             // Collect all instruction rows dynamically
             const instructionRows = document.querySelectorAll('.instruction-row');
@@ -277,16 +290,7 @@
 
             const payload = {
                 name: name,
-                recipe_ingredients: [
-                    {
-                        ingredient: {
-                            name: ingName,
-                            dietary_tags: dietaryTags
-                        },
-                        quantity: quantity,
-                        unit: unit
-                    }
-                ],
+                recipe_ingredients: ingredients,
                 instructions: instructions
             };
 
