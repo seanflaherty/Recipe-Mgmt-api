@@ -47,8 +47,8 @@ class RecipeIngredientSchema(BaseModel):
 
 class InstructionSchema(BaseModel):
     description: str = Field(..., example="Mix ingredients in a bowl.")
-    prep_time: int = Field(default=0, example=5)
     equipment: List[str] = Field(default=[], example=["mixing bowl", "spoon"])
+    prep_time: int = Field(default=0, example=5)
     include_in_prep_time: bool = Field(default=True)
 
 
@@ -103,6 +103,7 @@ def get_db_recipes(
             "instructions": [
                 {
                     "description": ins.description,
+                    "equipment": ins.equipment.split(",") if ins.equipment else [],
                     "prep_time": ins.prep_time,
                     "include_in_prep_time": ins.include_in_prep_time,
                 }
@@ -132,7 +133,7 @@ def get_db_recipes(
 def add_recipe(recipe_data: RecipeCreateSchema, db: Session = Depends(get_db)):
     """Add a new recipe to the database and optionally keep CSV persistence."""
     try:
-        # 1. Check if a recipe with this name already exists
+        # Check if a recipe with this name already exists
         existing_recipe = (
             db.query(RecipeModel).filter(RecipeModel.name == recipe_data.name).first()
         )
@@ -142,10 +143,10 @@ def add_recipe(recipe_data: RecipeCreateSchema, db: Session = Depends(get_db)):
                 detail=f"Recipe '{recipe_data.name}' already exists in the database.",
             )
 
-        # 2. Create the main Recipe database record
+        # Create the main Recipe database record
         db_recipe = RecipeModel(name=recipe_data.name)
 
-        # 3. Add ingredients
+        # Add ingredients
         for ri in recipe_data.recipe_ingredients:
             tags_str = ",".join(ri.ingredient.dietary_tags)
             db_ingredient = RecipeIngredientModel(
@@ -156,16 +157,17 @@ def add_recipe(recipe_data: RecipeCreateSchema, db: Session = Depends(get_db)):
             )
             db_recipe.ingredients.append(db_ingredient)
 
-        # 4. Add instructions
+        # Add instructions
         for ins in recipe_data.instructions:
             db_instruction = InstructionModel(
                 description=ins.description,
+                equipment=equipment_str,
                 prep_time=ins.prep_time,
                 include_in_prep_time=ins.include_in_prep_time,
             )
             db_recipe.instructions.append(db_instruction)
 
-        # 5. Commit to database (SQLite or PostgreSQL)
+        # Commit to database (SQLite or PostgreSQL)
         db.add(db_recipe)
         db.commit()
         db.refresh(db_recipe)
