@@ -159,6 +159,7 @@ def add_recipe(recipe_data: RecipeCreateSchema, db: Session = Depends(get_db)):
 
         # Add instructions
         for ins in recipe_data.instructions:
+            equipment_str = ",".join(ins.equipment)
             db_instruction = InstructionModel(
                 description=ins.description,
                 equipment=equipment_str,
