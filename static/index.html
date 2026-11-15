@@ -41,7 +41,7 @@
 
                     <!-- Ingredient Details -->
                     <div class="border-t pt-3 space-y-3">
-                        <h3 class="text-sm font-semibold text-gray-700">Main Ingredient</h3>
+                        <h3 class="text-sm font-semibold text-gray-700">Ingredients</h3>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-xs font-medium text-gray-500 mb-1">Ingredient Name</label>
@@ -71,49 +71,61 @@
 
                     <!-- Instruction Details -->
                     <div class="border-t pt-3 space-y-3">
-                        <h3 class="text-sm font-semibold text-gray-700">First Instruction Step</h3>
+                        <h3 class="text-sm font-semibold text-gray-700">Instruction Steps</h3>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Description</label>
                             <input type="text" id="ins-description" placeholder="e.g. Mix ingredients in a bowl."
                                 required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Prep Time (minutes)</label>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Equipment</label>
+                            <input type="text" id="ins-equipment" placeholder="e.g. mixing bowl, spoon"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Step Prep Time (minutes)</label>
                             <input type="number" id="ins-prep-time" value="5" required
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                         </div>
                     </div>
-
-                    <button type="submit"
-                        class="w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition text-sm">
-                        Save Recipe to Database
-                    </button>
-                </form>
-
-                <!-- Feedback target container -->
-                <div id="result-message" class="mt-4 text-sm"></div>
-            </section>
-
-            <!-- Section: Recipe List -->
-            <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold text-gray-700">Recipe Book</h2>
-
-                    <!-- Refresh List Button powered by HTMX -->
-                    <button hx-get="/recipes-db" hx-target="#recipe-list-container" hx-swap="innerHTML"
-                        class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition">
-                        Refresh List
-                    </button>
-                </div>
-
-                <!-- HTMX GET trigger on page load -->
-                <div id="recipe-list-container" hx-get="/recipes-db" hx-trigger="load" hx-swap="innerHTML"
-                    class="text-gray-500 italic text-sm">
-                    Loading recipes from database...
-                </div>
-            </section>
-
+                    <div class="flex items-center space-x-2 pt-1">
+                        <input type="checkbox" id="ins-include-prep" checked
+                            class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+                        <label for="ins-include-prep" class="text-xs font-medium text-gray-600">Include in total prep
+                            time?</label>
+                    </div>
         </div>
+
+        <button type="submit"
+            class="w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition text-sm">
+            Save Recipe to Database
+        </button>
+        </form>
+
+        <!-- Feedback target container -->
+        <div id="result-message" class="mt-4 text-sm"></div>
+        </section>
+
+        <!-- Section: Recipe List -->
+        <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-700">Recipe Book</h2>
+
+                <!-- Refresh List Button powered by HTMX -->
+                <button hx-get="/recipes-db" hx-target="#recipe-list-container" hx-swap="innerHTML"
+                    class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition">
+                    Refresh List
+                </button>
+            </div>
+
+            <!-- HTMX GET trigger on page load -->
+            <div id="recipe-list-container" hx-get="/recipes-db" hx-trigger="load" hx-swap="innerHTML"
+                class="text-gray-500 italic text-sm">
+                Loading recipes from database...
+            </div>
+        </section>
+
+    </div>
     </div>
 
     <!-- Recipe Details Modal (Pop-up Window) -->
@@ -152,7 +164,10 @@
             const unit = document.getElementById('ing-unit').value;
 
             const description = document.getElementById('ins-description').value;
+            const equipmentRaw = document.getElementById('ins-equipment').value;
+            const equipment = equipmentRaw ? equipmentRaw.split(',').map(e => e.trim()).filter(e => e.length > 0) : [];
             const prepTime = parseInt(document.getElementById('ins-prep-time').value, 10);
+            const includeInPrepTime = document.getElementById('ins-include-prep').checked;
 
             const payload = {
                 name: name,
@@ -170,7 +185,7 @@
                     {
                         description: description,
                         prep_time: prepTime,
-                        equipment: [],
+                        equipment: equipment,
                         include_in_prep_time: true
                     }
                 ]
@@ -240,8 +255,8 @@
             // Render inside modal content container
             modalContent.innerHTML = `
         <p class="text-sm"><strong>Total Prep Time:</strong> ${recipeData.total_prep_time} minutes</p>
-        ${ingredientsHtml}
-        ${instructionsHtml}
+                ${ingredientsHtml}
+                ${instructionsHtml}
     `;
 
             // Show the modal
