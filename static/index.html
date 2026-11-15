@@ -186,7 +186,7 @@
                         description: description,
                         prep_time: prepTime,
                         equipment: equipment,
-                        include_in_prep_time: true
+                        include_in_prep_time: includeInPrepTime
                     }
                 ]
             };
@@ -245,7 +245,14 @@
             let instructionsHtml = '<h4 class="font-semibold text-gray-700 mt-4">Instructions:</h4><ol class="list-decimal list-inside space-y-2 text-sm">';
             if (recipeData.instructions && recipeData.instructions.length > 0) {
                 recipeData.instructions.forEach(ins => {
-                    instructionsHtml += `<li>${ins.description} <span class="text-xs text-gray-400">(Prep: ${ins.prep_time} mins)</span></li>`;
+                    const equipText = ins.equipment && ins.equipment.length > 0
+                        ? ` <span class="text-xs text-gray-500 font-medium">[Equipment: ${ins.equipment.join(', ')}]</span>`
+                        : '';
+                    const prepNote = ins.include_in_prep_time
+                        ? `(Prep: ${ins.prep_time} mins)`
+                        : `(Prep: ${ins.prep_time} mins - excluded)`;
+
+                    instructionsHtml += `<li>${ins.description}${equipText} <span class="text-xs text-gray-400">${prepNote}</span></li>`;
                 });
             } else {
                 instructionsHtml += '<li class="text-gray-400 italic">No instructions listed.</li>';
