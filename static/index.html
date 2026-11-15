@@ -211,7 +211,7 @@
         }
 
         // Helper function to append a new step row
-        function addInstructionStep(instruction = '', equipment = '', prepTime = 5, includeInPrep = true) {
+        function addInstructionStep(description = '', equipment = '', prepTime = 5, includeInPrep = true) {
             const container = document.getElementById('instructions-container');
             const row = document.createElement('div');
             row.className = 'instruction-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2';
