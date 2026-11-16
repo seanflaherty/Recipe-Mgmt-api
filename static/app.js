@@ -1,0 +1,214 @@
+// Helper function to append a new ingredient row
+function addIngredient(ingredientName = '', dietaryTags = '', quantity = 1, unit = '') {
+    const container = document.getElementById('ingredients-container');
+    const row = document.createElement('div');
+    row.className = 'ingredient-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2';
+    row.innerHTML = `
+    <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Ingredient Name</label>
+        <input type="text" placeholder="e.g. Flour" value="${ingredientName}" required
+            class="ing-name w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+    </div>
+    <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Dietary Tags (comma-separated)</label>
+        <input type="text" placeholder="e.g. VEGAN, GLUTEN" value="${dietaryTags}"
+            class="ing-tags w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+    </div>
+    <div class="grid grid-cols-2 gap-2">
+        <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Quantity</label>
+            <input type="number" step="0.1" value="${quantity}" required
+                class="ing-quantity w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Unit</label>
+            <input type="text" placeholder="e.g. cups" value="${unit}" required
+                class="ing-unit w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+        </div>
+    </div>
+    <div class="flex items-center justify-between pt-1">
+        <button type="button" onclick="this.closest('.ingredient-row').remove()"
+            class="text-xs text-red-500 hover:text-red-700 font-medium">
+            Remove Ingredient
+        </button>
+    </div>
+    `;
+    container.appendChild(row);
+}
+
+// Helper function to append a new step row
+function addInstructionStep(instruction = '', equipment = '', prepTime = 5, includeInPrep = true) {
+    const container = document.getElementById('instructions-container');
+    const row = document.createElement('div');
+    row.className = 'instruction-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2';
+    row.innerHTML = `
+    <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Instruction</label>
+        <input type="text" placeholder="e.g. Mix ingredients in a bowl." value="${instruction}" required
+            class="ins-desc w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+    </div>
+    <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Equipment</label>
+        <input type="text" placeholder="e.g. mixing bowl, spoon" value="${equipment}"
+            class="ins-equip w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+    </div>
+    <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Step Prep Time (minutes)</label>
+        <input type="number" value="${prepTime}" required
+            class="ins-time w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+    </div>
+    <div class="flex items-center justify-between pt-1">
+        <label class="flex items-center space-x-2 text-xs font-medium text-gray-600">
+            <input type="checkbox" ${includeInPrep ? 'checked' : ''} class="ins-include w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+                <span>Include in total prep time?</span>
+        </label>
+        <button type="button" onclick="this.closest('.instruction-row').remove()"
+            class="text-xs text-red-500 hover:text-red-700 font-medium">
+            Remove Step
+        </button>
+    </div>
+    `;
+    container.appendChild(row);
+}
+
+async function submitRecipe(event) {
+    event.preventDefault();
+
+    const name = document.getElementById('recipe-name').value;
+
+    // Collect all ingredient rows dynamically
+    const ingredientRows = document.querySelectorAll('.ingredient-row');
+    const recipeIngredients = [];
+    ingredientRows.forEach(row => {
+        const ingredientName = row.querySelector('.ing-name').value;
+        const dietaryTagsRaw = row.querySelector('.ing-tags').value;
+        const dietaryTags = dietaryTagsRaw ? dietaryTagsRaw.split(',').map(e => e.trim()).filter(e => e.length > 0) : [];
+        const quantity = parseFloat(row.querySelector('.ing-quantity').value);
+        const unit = row.querySelector('.ing-unit').value;
+
+        recipeIngredients.push({
+            ingredient: {
+                name: ingredientName,
+                dietary_tags: dietaryTags
+            },
+            quantity: quantity,
+            unit: unit
+        });
+    });
+
+    // Collect all instruction rows dynamically
+    const instructionRows = document.querySelectorAll('.instruction-row');
+    const instructions = [];
+    instructionRows.forEach(row => {
+        const desc = row.querySelector('.ins-desc').value;
+        const equipRaw = row.querySelector('.ins-equip').value;
+        const equipment = equipRaw ? equipRaw.split(',').map(e => e.trim()).filter(e => e.length > 0) : [];
+        const prepTime = parseInt(row.querySelector('.ins-time').value, 10);
+        const includeInPrepTime = row.querySelector('.ins-include').checked;
+
+        instructions.push({
+            description: desc,
+            prep_time: prepTime,
+            equipment: equipment,
+            include_in_prep_time: includeInPrepTime
+        });
+    });
+
+    const payload = {
+        name: name,
+        recipe_ingredients: recipeIngredients,
+        instructions: instructions
+    };
+
+    try {
+        const response = await fetch('/recipes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        const resultDiv = document.getElementById('result-message');
+
+        if (response.ok) {
+            resultDiv.innerHTML = `<div class='p-3 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200 text-xs'>${result.message}</div>`;
+            loadRecipes();
+            document.getElementById('recipe-form').reset();
+
+            // Reset back to single clean rows
+            document.getElementById('instructions-container').innerHTML = '';
+            addInstructionStep();
+            document.getElementById('ingredients-container').innerHTML = '';
+            addIngredient();
+        } else {
+            resultDiv.innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Error: ${result.detail || 'Failed to save'}</div>`;
+        }
+    } catch (err) {
+        document.getElementById('result-message').innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Network error: ${err.message}</div>`;
+    }
+}
+
+// Functions to open and populate the modal with recipe details
+function openRecipeModal(button) {
+    const modal = document.getElementById('recipe-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalContent = document.getElementById('modal-content');
+
+    const recipeData = JSON.parse(button.getAttribute('data-recipe'));
+    modalTitle.innerText = recipeData.name;
+
+    let ingredientsHtml = '<h4 class="font-semibold text-gray-700 mt-2">Ingredients:</h4><ul class="list-disc list-inside space-y-1 text-sm">';
+    if (recipeData.ingredients && recipeData.ingredients.length > 0) {
+        recipeData.ingredients.forEach(ing => {
+            const tags = ing.dietary_tags && ing.dietary_tags.length > 0 ? ` <span class="text-xs bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded">${ing.dietary_tags.join(', ')}</span>` : '';
+            ingredientsHtml += `<li>${ing.quantity} ${ing.unit} ${ing.name}${tags}</li>`;
+        });
+    } else {
+        ingredientsHtml += '<li class="text-gray-400 italic">No ingredients listed.</li>';
+    }
+    ingredientsHtml += '</ul>';
+
+    let instructionsHtml = '<h4 class="font-semibold text-gray-700 mt-4">Instructions:</h4><ol class="list-decimal list-inside space-y-2 text-sm">';
+    if (recipeData.instructions && recipeData.instructions.length > 0) {
+        recipeData.instructions.forEach(ins => {
+            const equipText = ins.equipment && ins.equipment.length > 0
+                ? ` <span class="text-xs text-gray-500 font-medium">[Equipment: ${ins.equipment.join(', ')}]</span>`
+                : '';
+            const prepNote = ins.include_in_prep_time
+                ? `(Prep: ${ins.prep_time} mins)`
+                : `(Prep: ${ins.prep_time} mins - excluded)`;
+
+            instructionsHtml += `<li>${ins.description}${equipText} <span class="text-xs text-gray-400">${prepNote}</span></li>`;
+        });
+    } else {
+        instructionsHtml += '<li class="text-gray-400 italic">No instructions listed.</li>';
+    }
+    instructionsHtml += '</ol>';
+
+    modalContent.innerHTML = `
+    <p class="text-sm"><strong>Total Prep Time:</strong> ${recipeData.total_prep_time} minutes</p>
+    ${ingredientsHtml}
+    ${instructionsHtml}
+    `;
+
+    modal.classList.remove('hidden');
+}
+
+function closeRecipeModal() {
+    document.getElementById('recipe-modal').classList.add('hidden');
+}
+
+async function loadRecipes() {
+    const container = document.getElementById('recipe-list-container');
+    container.innerHTML = "<p class='text-gray-400 italic text-sm'>Loading recipes from database...</p>";
+
+    try {
+        const response = await fetch('/recipes-db');
+        const htmlContent = await response.text();
+        container.innerHTML = htmlContent;
+    } catch (err) {
+        container.innerHTML = `<p class='text-red-500 text-xs'>Failed to load recipes: ${err.message}</p>`;
+    }
+}
+
+window.addEventListener('DOMContentLoaded', loadRecipes);
