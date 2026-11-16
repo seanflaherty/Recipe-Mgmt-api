@@ -5,7 +5,6 @@ request handler functions (`get_recipes`, `add_recipe`, and `delete_recipe`),
 managing in-memory state and disk persistence (`storage.py`).
 """
 
-from pathlib import Path
 from typing import List, Optional
 import json
 from fastapi import FastAPI, HTTPException, Query, Depends
@@ -13,7 +12,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
-from recipe_mgmt.storage import select_loader
 from .database import get_db, engine, Base
 from .models import RecipeModel, RecipeIngredientModel, InstructionModel
 
@@ -163,15 +161,6 @@ def add_recipe(recipe_data: RecipeCreateSchema, db: Session = Depends(get_db)):
         db.add(db_recipe)
         db.commit()
         db.refresh(db_recipe)
-
-        # (Optional) Keep your legacy CSV file export if you still want local flat-file backups
-        try:
-            loader = select_loader("csv")
-            filename = f"{recipe_data.name.lower().replace(' ', '_')}.csv"
-            destination = Path("src/recipe_mgmt/recipes") / filename
-            # Reconstruct domain model for CSV export if needed, or skip if fully moving to DB
-        except Exception:
-            pass
 
         return {
             "message": "Recipe added and saved to database successfully!",
