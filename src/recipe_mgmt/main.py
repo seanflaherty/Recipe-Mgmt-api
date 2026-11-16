@@ -5,6 +5,8 @@ request handler functions (`get_recipes`, `add_recipe`, and `delete_recipe`),
 managing in-memory state and disk persistence (`storage.py`).
 """
 
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
 from typing import List, Optional
 import json
 from fastapi import FastAPI, HTTPException, Query, Depends
@@ -24,6 +26,11 @@ app = FastAPI(
     docs_url="/ui",  # Keeps the UI path.
     redoc_url=None,
 )
+
+BASE_DIR = Path(__file__).resolve().parent
+
+# Mount the static files directory
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 
 # --- Pydantic Models for Request Validation & Swagger UI ---
