@@ -6,12 +6,11 @@ managing in-memory state and disk persistence (`storage.py`).
 """
 
 from pathlib import Path
-from fastapi.staticfiles import StaticFiles
 from typing import List, Optional
 import json
-from fastapi import FastAPI, HTTPException, Query, Depends
-from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from .database import get_db, engine, Base
@@ -27,10 +26,10 @@ app = FastAPI(
     redoc_url=None,
 )
 
-BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = Path(__file__).resolve().parents[2] / "static"
 
 # Mount the static files directory
-app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 # --- Pydantic Models for Request Validation & Swagger UI ---
@@ -56,6 +55,11 @@ class RecipeCreateSchema(BaseModel):
     name: str = Field(..., example="Homemade Bread")
     recipe_ingredients: List[RecipeIngredientSchema] = []
     instructions: List[InstructionSchema] = []
+
+
+@app.get("/")
+async def read_index():
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.get("/recipes-db", summary="Get recipes from database")
