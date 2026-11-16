@@ -43,12 +43,9 @@
                     <div class="border-t pt-3 space-y-3">
                         <div class="flex justify-between items-center">
                             <h3 class="text-sm font-semibold text-gray-700">Ingredients</h3>
-                            <button type="button" onclick="addIngredient()"
-                                class="text-xs bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-medium px-2 py-1 rounded transition">
-                                + Add Ingredient
-                            </button>
                         </div>
 
+                        <!-- Container where ingredient rows are added -->
                         <div id="ingredients-container" class="space-y-3">
                             <div class="ingredient-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
                                 <div>
@@ -77,75 +74,85 @@
                             </div>
                         </div>
 
-                        <!-- Instruction Details -->
-                        <div class="border-t pt-3 space-y-3">
-                            <div class="flex justify-between items-center">
-                                <h3 class="text-sm font-semibold text-gray-700">Instruction Steps</h3>
-                                <button type="button" onclick="addInstructionStep()"
-                                    class="text-xs bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-medium px-2 py-1 rounded transition">
-                                    + Add Step
-                                </button>
-                            </div>
+                        <div class="flex justify-center pt-1">
+                            <button type="button" onclick="addIngredient()"
+                                class="text-xs bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-medium px-4 py-1.5 rounded-lg transition border border-emerald-100">
+                                + Add Another Ingredient
+                            </button>
+                        </div>
+                    </div>
 
-                            <div id="instructions-container" class="space-y-3">
-                                <div class="instruction-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-500 mb-1">Instructions</label>
-                                        <input type="text" placeholder="e.g. Mix ingredients in a bowl." required
-                                            class="ins-desc w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-500 mb-1">Equipment</label>
-                                        <input type="text" placeholder="e.g. mixing bowl, spoon"
-                                            class="ins-equip w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-500 mb-1">Step Prep Time
-                                            (minutes)</label>
-                                        <input type="number" value="5" required
-                                            class="ins-time w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                                    </div>
-                                    <div class="flex items-center justify-between pt-1">
-                                        <label class="flex items-center space-x-2 text-xs font-medium text-gray-600">
-                                            <input type="checkbox" checked
-                                                class="ins-include w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
-                                            <span>Include in total prep time?</span>
-                                        </label>
-                                    </div>
+                    <!-- Instruction Details -->
+                    <div class="border-t pt-3 space-y-3">
+
+                        <!-- Container where instruction rows are added -->
+                        <div id="instructions-container" class="space-y-3">
+                            <div class="instruction-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Instructions</label>
+                                    <input type="text" placeholder="e.g. Mix ingredients in a bowl." required
+                                        class="ins-desc w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Equipment</label>
+                                    <input type="text" placeholder="e.g. mixing bowl, spoon"
+                                        class="ins-equip w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Step Prep Time
+                                        (minutes)</label>
+                                    <input type="number" value="5" required
+                                        class="ins-time w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                                </div>
+                                <div class="flex items-center justify-between pt-1">
+                                    <label class="flex items-center space-x-2 text-xs font-medium text-gray-600">
+                                        <input type="checkbox" checked
+                                            class="ins-include w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+                                        <span>Include in total prep time?</span>
+                                    </label>
                                 </div>
                             </div>
-                        </div> <!-- Closes Instructions wrapper -->
+                        </div>
+                    </div> <!-- Closes Instructions wrapper -->
 
-                        <button type="submit"
-                            class="mt-4 w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition text-sm">
-                            Save Recipe to Database
+                    <div class="flex justify-center pt-1">
+                        <button type="button" onclick="addInstructionStep()"
+                            class="text-xs bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-medium px-4 py-1.5 rounded-lg transition border border-emerald-100">
+                            + Add Another Step
                         </button>
-                </form>
-
-                <!-- Feedback target container -->
-                <div id="result-message" class="mt-4 text-sm"></div>
-            </section>
-
-            <!-- Section: Recipe List -->
-            <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold text-gray-700">Recipe Book</h2>
-
-                    <!-- Refresh List Button powered by HTMX -->
-                    <button hx-get="/recipes-db" hx-target="#recipe-list-container" hx-swap="innerHTML"
-                        class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition">
-                        Refresh List
-                    </button>
-                </div>
-
-                <!-- HTMX GET trigger on page load -->
-                <div id="recipe-list-container" hx-get="/recipes-db" hx-trigger="load" hx-swap="innerHTML"
-                    class="text-gray-500 italic text-sm">
-                    Loading recipes from database...
-                </div>
-            </section>
-
+                    </div>
         </div>
+
+        <button type="submit"
+            class="mt-4 w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition text-sm">
+            Save Recipe to Database
+        </button>
+        </form>
+
+        <!-- Feedback target container -->
+        <div id="result-message" class="mt-4 text-sm"></div>
+        </section>
+
+        <!-- Section: Recipe List -->
+        <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-700">Recipe Book</h2>
+
+                <!-- Refresh List Button powered by HTMX -->
+                <button hx-get="/recipes-db" hx-target="#recipe-list-container" hx-swap="innerHTML"
+                    class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition">
+                    Refresh List
+                </button>
+            </div>
+
+            <!-- HTMX GET trigger on page load -->
+            <div id="recipe-list-container" hx-get="/recipes-db" hx-trigger="load" hx-swap="innerHTML"
+                class="text-gray-500 italic text-sm">
+                Loading recipes from database...
+            </div>
+        </section>
+
+    </div>
     </div>
 
     <!-- Recipe Details Modal (Pop-up Window) -->
