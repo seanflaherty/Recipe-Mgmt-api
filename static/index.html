@@ -29,7 +29,7 @@
 
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-
+            <h2 id="form-title" class="text-xl font-semibold mb-4 text-gray-700">Add a New Recipe</h2>
             <!-- Section: Add Recipe Form -->
             <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h2 class="text-xl font-semibold mb-4 text-gray-700">Add a New Recipe</h2>
@@ -128,10 +128,16 @@
                         </button>
                     </div>
 
-                    <button type="submit"
-                        class="mt-4 w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition text-sm">
-                        Save Recipe to Database
-                    </button>
+                    <div class="mt-4 flex gap-2">
+                        <button type="submit" id="submit-btn"
+                            class="w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition text-sm">
+                            Save Recipe to Database
+                        </button>
+                        <button type="button" id="cancel-edit-btn" onclick="cancelEdit()"
+                            class="hidden bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-300 transition text-sm">
+                            Cancel
+                        </button>
+                    </div>
                 </form>
 
                 <!-- Feedback target container -->
@@ -174,10 +180,16 @@
                 </div>
 
                 <div class="flex justify-between items-center pt-3 border-t">
-                    <button id="delete-recipe-btn" onclick="deleteRecipe()"
-                        class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition">
-                        Delete Recipe
-                    </button>
+                    <div class="space-x-2">
+                        <button id="edit-recipe-btn" onclick="startEditRecipe()"
+                            class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-100 transition">
+                            Edit Recipe
+                        </button>
+                        <button id="delete-recipe-btn" onclick="deleteRecipe()"
+                            class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition">
+                            Delete Recipe
+                        </button>
+                    </div>
                     <button onclick="closeRecipeModal()"
                         class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition">
                         Close
