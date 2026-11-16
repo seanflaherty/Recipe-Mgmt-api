@@ -180,9 +180,12 @@ async function submitRecipe(event) {
         instructions: instructions
     };
 
+    const url = editingRecipeId ? `/recipes/${editingRecipeId}` : '/recipes';
+    const method = editingRecipeId ? 'PUT' : 'POST';
+
     try {
-        const response = await fetch('/recipes', {
-            method: 'POST',
+        const response = await fetch(url, {
+            method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
@@ -193,13 +196,7 @@ async function submitRecipe(event) {
         if (response.ok) {
             resultDiv.innerHTML = `<div class='p-3 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200 text-xs'>${result.message}</div>`;
             loadRecipes();
-            document.getElementById('recipe-form').reset();
-
-            // Reset back to single clean rows
-            document.getElementById('instructions-container').innerHTML = '';
-            addInstructionStep();
-            document.getElementById('ingredients-container').innerHTML = '';
-            addIngredient();
+            cancelEdit();
         } else {
             resultDiv.innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Error: ${result.detail || 'Failed to save'}</div>`;
         }
@@ -317,6 +314,19 @@ async function loadRecipes() {
         }
     } catch (err) {
         document.getElementById('result-message').innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Network error: ${err.message}</div>`;
+    }
+}
+
+async function loadRecipes() {
+    const container = document.getElementById('recipe-list-container');
+    container.innerHTML = "<p class='text-gray-400 italic text-sm'>Loading recipes from database...</p>";
+
+    try {
+        const response = await fetch('/recipes-db');
+        const htmlContent = await response.text();
+        container.innerHTML = htmlContent;
+    } catch (err) {
+        container.innerHTML = `<p class='text-red-500 text-xs'>Failed to load recipes: ${err.message}</p>`;
     }
 }
 
