@@ -1,3 +1,63 @@
+let currentRecipe = null;
+let editingRecipeId = null;
+
+// Edit recipe function
+function startEditRecipe() {
+    if (!currentRecipe) return;
+
+    editingRecipeId = currentRecipe.id;
+
+    // Update form heading & buttons for Edit Mode
+    document.getElementById('form-title').innerText = `Edit Recipe: ${currentRecipe.name}`;
+    document.getElementById('submit-btn').innerText = 'Update Recipe';
+    document.getElementById('cancel-edit-btn').classList.remove('hidden');
+
+    // Populate recipe name
+    document.getElementById('recipe-name').value = currentRecipe.name;
+
+    // Populate ingredient rows (reusing your existing addIngredient helper!)
+    const ingContainer = document.getElementById('ingredients-container');
+    ingContainer.innerHTML = '';
+    if (currentRecipe.ingredients && currentRecipe.ingredients.length > 0) {
+        currentRecipe.ingredients.forEach(ing => {
+            const tagsStr = ing.dietary_tags ? ing.dietary_tags.join(', ') : '';
+            addIngredient(ing.name, tagsStr, ing.quantity, ing.unit);
+        });
+    } else {
+        addIngredient();
+    }
+
+    // Populate instruction rows (reusing your existing addInstructionStep helper!)
+    const insContainer = document.getElementById('instructions-container');
+    insContainer.innerHTML = '';
+    if (currentRecipe.instructions && currentRecipe.instructions.length > 0) {
+        currentRecipe.instructions.forEach(ins => {
+            const equipStr = ins.equipment ? ins.equipment.join(', ') : '';
+            addInstructionStep(ins.description, equipStr, ins.prep_time, ins.include_in_prep_time);
+        });
+    } else {
+        addInstructionStep();
+    }
+
+    // Close modal and scroll smoothly to the form
+    closeRecipeModal();
+    document.getElementById('recipe-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelEdit() {
+    editingRecipeId = null;
+    document.getElementById('form-title').innerText = 'Add a New Recipe';
+    document.getElementById('submit-btn').innerText = 'Save Recipe to Database';
+    document.getElementById('cancel-edit-btn').classList.add('hidden');
+
+    document.getElementById('recipe-form').reset();
+    document.getElementById('ingredients-container').innerHTML = '';
+    addIngredient();
+    document.getElementById('instructions-container').innerHTML = '';
+    addInstructionStep();
+}
+
+
 // Helper function to append a new ingredient row
 function addIngredient(ingredientName = '', dietaryTags = '', quantity = 1, unit = '') {
     const container = document.getElementById('ingredients-container');
@@ -156,6 +216,7 @@ function openRecipeModal(button) {
 
     const recipeData = JSON.parse(button.getAttribute('data-recipe'));
     currentRecipe = recipeData;  // <-- Store the active recipe
+    modalTitle.innerText = recipeData.name;
 
     let ingredientsHtml = '<h4 class="font-semibold text-gray-700 mt-2">Ingredients:</h4><ul class="list-disc list-inside space-y-1 text-sm">';
     if (recipeData.ingredients && recipeData.ingredients.length > 0) {
@@ -234,12 +295,28 @@ async function loadRecipes() {
     const container = document.getElementById('recipe-list-container');
     container.innerHTML = "<p class='text-gray-400 italic text-sm'>Loading recipes from database...</p>";
 
+    const url = editingRecipeId ? `/recipes/${editingRecipeId}` : '/recipes';
+    const method = editingRecipeId ? 'PUT' : 'POST';
+
     try {
-        const response = await fetch('/recipes-db');
-        const htmlContent = await response.text();
-        container.innerHTML = htmlContent;
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        const resultDiv = document.getElementById('result-message');
+
+        if (response.ok) {
+            resultDiv.innerHTML = `<div class='p-3 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200 text-xs'>${result.message}</div>`;
+            loadRecipes();
+            cancelEdit(); // Resets the form, clears rows, and exits Edit Mode
+        } else {
+            resultDiv.innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Error: ${result.detail || 'Failed to save'}</div>`;
+        }
     } catch (err) {
-        container.innerHTML = `<p class='text-red-500 text-xs'>Failed to load recipes: ${err.message}</p>`;
+        document.getElementById('result-message').innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Network error: ${err.message}</div>`;
     }
 }
 

@@ -207,3 +207,62 @@ def delete_recipe(id: int, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/recipes/{id}", summary="Update an existing recipe by id")
+def update_recipe(
+    id: int, recipe_data: RecipeCreateSchema, db: Session = Depends(get_db)
+):
+    """Update an existing recipe's name, ingredients, and instructions."""
+    db_recipe = db.query(RecipeModel).filter(RecipeModel.id == id).first()
+    if not db_recipe:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Recipe with ID '{id}' not found in the database.",
+        )
+
+    # Prevent renaming to a name already used by a different recipe
+    duplicate = (
+        db.query(RecipeModel)
+        .filter(RecipeModel.name == recipe_data.name, RecipeModel.id != id)
+        .first()
+    )
+    if duplicate:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Another recipe named '{recipe_data.name}' already exists.",
+        )
+
+    try:
+        db_recipe.name = recipe_data.name
+
+        # Replace existing ingredients and instructions (cascade deletes orphans)
+        db_recipe.ingredients.clear()
+        for ri in recipe_data.recipe_ingredients:
+            db_recipe.ingredients.append(
+                RecipeIngredientModel(
+                    ingredient_name=ri.ingredient.name,
+                    quantity=ri.quantity,
+                    unit=ri.unit,
+                    dietary_tags=",".join(ri.ingredient.dietary_tags),
+                )
+            )
+
+        db_recipe.instructions.clear()
+        for ins in recipe_data.instructions:
+            db_recipe.instructions.append(
+                InstructionModel(
+                    description=ins.description,
+                    equipment=",".join(ins.equipment),
+                    prep_time=ins.prep_time,
+                    include_in_prep_time=ins.include_in_prep_time,
+                )
+            )
+
+        db.commit()
+        db.refresh(db_recipe)
+        return {"message": f"Recipe '{db_recipe.name}' updated successfully!"}
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
