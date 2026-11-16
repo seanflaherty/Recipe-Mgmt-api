@@ -87,6 +87,7 @@ def get_db_recipes(
 
         # Build dictionary containing all recipe fields
         recipe_dict = {
+            "id": r.id,
             "name": r.name,
             "total_prep_time": total_prep,
             "ingredients": [
@@ -206,7 +207,3 @@ def delete_recipe(id: int, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-
-
-# Mount the "static" folder to the root URL
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
