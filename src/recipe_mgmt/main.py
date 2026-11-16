@@ -13,9 +13,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
-from recipe_mgmt.components import DietaryTag, Ingredient, RecipeIngredient
-from recipe_mgmt.recipe import Instruction, Recipe
-from recipe_mgmt.recipe_book import RecipeBook
 from recipe_mgmt.storage import select_loader
 from .database import get_db, engine, Base
 from .models import RecipeModel, RecipeIngredientModel, InstructionModel
@@ -32,8 +29,6 @@ app = FastAPI(
 
 
 # --- Pydantic Models for Request Validation & Swagger UI ---
-
-
 class IngredientSchema(BaseModel):
     name: str = Field(..., example="Flour")
     dietary_tags: List[str] = Field(default=[], example=["VEGAN", "GLUTEN"])
@@ -56,10 +51,6 @@ class RecipeCreateSchema(BaseModel):
     name: str = Field(..., example="Homemade Bread")
     recipe_ingredients: List[RecipeIngredientSchema] = []
     instructions: List[InstructionSchema] = []
-
-
-# Initialize a shared RecipeBook instance for the app
-recipe_book = RecipeBook("My Recipe Collection", recipes=[])
 
 
 @app.get("/recipes-db", summary="Get recipes from database")
@@ -198,15 +189,23 @@ def add_recipe(recipe_data: RecipeCreateSchema, db: Session = Depends(get_db)):
 
 
 @app.delete("/recipes/{name}", summary="Delete a recipe by name")
-def delete_recipe(name: str):
-    """Remove a recipe by name from the recipe book."""
+def delete_recipe(name: str, db: Session = Depends(get_db)):
+    """Remove a recipe by name from the database."""
+    db_recipe = db.query(RecipeModel).filter(RecipeModel.name == name).first()
+    if not db_recipe:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Recipe '{name}' not found in the database.",
+        )
+
     try:
-        recipe_book.remove_by_name(name)
+        db.delete(db_recipe)
+        db.commit()
         return {"message": f"Recipe '{name}' deleted successfully"}
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
-        # SCF Mount the "static" folder to the root URL
 
-
+# Mount the "static" folder to the root URL
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
