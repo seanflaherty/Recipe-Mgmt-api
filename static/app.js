@@ -1,6 +1,43 @@
 let currentRecipe = null;
 let editingRecipeId = null;
 
+// Show message function
+let messageTimeout = null;
+
+function showMessage(text, isError = false) {
+    const resultDiv = document.getElementById('result-message');
+    if (!resultDiv) return;
+
+    // Clear any existing auto-dismiss timer so messages don't cut each other off
+    if (messageTimeout) {
+        clearTimeout(messageTimeout);
+        messageTimeout = null;
+    }
+
+    const styles = isError
+        ? 'bg-red-50 text-red-700 border-red-200'
+        : 'bg-emerald-50 text-emerald-700 border-emerald-200';
+
+    resultDiv.innerHTML = `
+        <div class="p-3 ${styles} rounded-lg border text-xs flex justify-between items-center gap-2">
+            <span>${text}</span>
+            <button type="button" onclick="clearMessage()"
+                class="font-bold text-base leading-none opacity-60 hover:opacity-100 transition"
+                aria-label="Dismiss message">&times;</button>
+        </div>
+    `;
+
+    // Auto-dismiss success notices after 4 seconds; leave errors up until dismissed
+    if (!isError) {
+        messageTimeout = setTimeout(clearMessage, 4000);
+    }
+}
+
+function clearMessage() {
+    const resultDiv = document.getElementById('result-message');
+    if (resultDiv) resultDiv.innerHTML = '';
+}
+
 // Edit recipe function
 function startEditRecipe() {
     if (!currentRecipe) return;
@@ -194,14 +231,14 @@ async function submitRecipe(event) {
         const resultDiv = document.getElementById('result-message');
 
         if (response.ok) {
-            resultDiv.innerHTML = `<div class='p-3 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200 text-xs'>${result.message}</div>`;
+            showMessage(result.message);
             loadRecipes();
             cancelEdit();
         } else {
-            resultDiv.innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Error: ${result.detail || 'Failed to save'}</div>`;
+            showMessage(`Error: ${result.detail || 'Failed to save'}`, true);
         }
     } catch (err) {
-        document.getElementById('result-message').innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Network error: ${err.message}</div>`;
+        showMessage(`Network error: ${err.message}`, true);
     }
 }
 
@@ -277,10 +314,10 @@ async function deleteRecipe() {
             }
         } else {
             const errorData = await response.json().catch(() => ({}));
-            alert(`Failed to delete recipe: ${errorData.detail || response.statusText}`);
+            showMessage(`Failed to delete recipe: ${errorData.detail || response.statusText}`, true);
         }
     } catch (err) {
-        alert(`Network error: ${err.message}`);
+        showMessage(`Network error: ${err.message}`, true);
     }
 }
 
@@ -306,11 +343,9 @@ async function loadRecipes() {
         const resultDiv = document.getElementById('result-message');
 
         if (response.ok) {
-            resultDiv.innerHTML = `<div class='p-3 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200 text-xs'>${result.message}</div>`;
+            closeRecipeModal();
             loadRecipes();
-            cancelEdit(); // Resets the form, clears rows, and exits Edit Mode
-        } else {
-            resultDiv.innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Error: ${result.detail || 'Failed to save'}</div>`;
+            showMessage(`Deleted "${currentRecipe.name}".`);
         }
     } catch (err) {
         document.getElementById('result-message').innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Network error: ${err.message}</div>`;
