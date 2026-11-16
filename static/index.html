@@ -173,7 +173,11 @@
                     <!-- Populated dynamically via JS -->
                 </div>
 
-                <div class="flex justify-end pt-3 border-t">
+                <div class="flex justify-between items-center pt-3 border-t">
+                    <button id="delete-recipe-btn" onclick="deleteRecipe()"
+                        class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition">
+                        Delete Recipe
+                    </button>
                     <button onclick="closeRecipeModal()"
                         class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition">
                         Close

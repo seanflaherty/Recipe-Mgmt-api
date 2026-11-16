@@ -155,7 +155,7 @@ function openRecipeModal(button) {
     const modalContent = document.getElementById('modal-content');
 
     const recipeData = JSON.parse(button.getAttribute('data-recipe'));
-    modalTitle.innerText = recipeData.name;
+    currentRecipe = recipeData;  // <-- Store the active recipe
 
     let ingredientsHtml = '<h4 class="font-semibold text-gray-700 mt-2">Ingredients:</h4><ul class="list-disc list-inside space-y-1 text-sm">';
     if (recipeData.ingredients && recipeData.ingredients.length > 0) {
@@ -192,6 +192,38 @@ function openRecipeModal(button) {
     `;
 
     modal.classList.remove('hidden');
+}
+
+async function deleteRecipe() {
+    if (!currentRecipe || !currentRecipe.id) {
+        alert("Error: Recipe ID not found.");
+        return;
+    }
+
+    // Confirm before permanently deleting
+    const confirmed = confirm(`Are you sure you want to delete "${currentRecipe.name}"?`);
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch(`/recipes/${currentRecipe.id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            closeRecipeModal();
+            loadRecipes(); // Refresh the Recipe Book list on the right
+
+            const resultDiv = document.getElementById('result-message');
+            if (resultDiv) {
+                resultDiv.innerHTML = `<div class='p-3 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200 text-xs'>Deleted "${currentRecipe.name}".</div>`;
+            }
+        } else {
+            const errorData = await response.json().catch(() => ({}));
+            alert(`Failed to delete recipe: ${errorData.detail || response.statusText}`);
+        }
+    } catch (err) {
+        alert(`Network error: ${err.message}`);
+    }
 }
 
 function closeRecipeModal() {

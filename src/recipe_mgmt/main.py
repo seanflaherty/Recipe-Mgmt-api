@@ -188,20 +188,21 @@ def add_recipe(recipe_data: RecipeCreateSchema, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.delete("/recipes/{name}", summary="Delete a recipe by name")
-def delete_recipe(name: str, db: Session = Depends(get_db)):
-    """Remove a recipe by name from the database."""
-    db_recipe = db.query(RecipeModel).filter(RecipeModel.name == name).first()
+@app.delete("/recipes/{id}", summary="Delete a recipe by id")
+def delete_recipe(id: int, db: Session = Depends(get_db)):
+    """Remove a recipe by ID from the database."""
+    db_recipe = db.query(RecipeModel).filter(RecipeModel.id == id).first()
     if not db_recipe:
         raise HTTPException(
             status_code=404,
-            detail=f"Recipe '{name}' not found in the database.",
+            detail=f"Recipe with ID '{id}' not found in the database.",
         )
 
+    recipe_name = db_recipe.name
     try:
         db.delete(db_recipe)
         db.commit()
-        return {"message": f"Recipe '{name}' deleted successfully"}
+        return {"message": f"Recipe '{recipe_name}' deleted successfully"}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
