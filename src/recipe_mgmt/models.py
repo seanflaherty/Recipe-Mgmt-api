@@ -13,10 +13,14 @@ class RecipeModel(Base):
 
     # Relationships to child tables
     ingredients = relationship(
-        "RecipeIngredientModel", cascade="all, delete-orphan", back_populates="recipe"
+        "RecipeIngredientModel",
+        back_populates="recipe",
+        cascade="all, delete-orphan",
     )
     instructions = relationship(
-        "InstructionModel", cascade="all, delete-orphan", back_populates="recipe"
+        "InstructionModel",
+        back_populates="recipe",
+        cascade="all, delete-orphan",
     )
 
 
