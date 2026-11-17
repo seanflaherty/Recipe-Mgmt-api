@@ -57,14 +57,14 @@ class Recipe:
     """Represents a complete recipe, including ingredients, instructions, and metadata.
 
     Attributes:
-        name: The display name of the recipe[cite: 1].
+        name: The display name of the recipe.
         recipe_ingredients: A list of `RecipeIngredient` associations linking the
-            recipe to its required ingredients[cite: 1].
-        instructions: A list of `Instruction` objects detailing the preparation steps[cite: 1].
+            recipe to its required ingredients.
+        instructions: A list of `Instruction` objects detailing the preparation steps.
 
     Properties:
-        total_prep_time: Calculates the aggregate preparation time across all included instructions[cite: 1].
-        required_equipment: Collects a unique set of all equipment needed by the recipe's instructions[cite: 1].
+        total_prep_time: Calculates the aggregate preparation time across all included instructions.
+        required_equipment: Collects a unique set of all equipment needed by the recipe's instructions.
     """
 
     def __init__(
