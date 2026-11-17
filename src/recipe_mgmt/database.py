@@ -21,7 +21,7 @@ connect_args = {"check_same_thread": False}
 
 engine = create_engine(DATABASE_URL)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SESSION_LOCAL = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
@@ -30,7 +30,7 @@ def get_db():
     """Dependency generator that yields a database session per request,
     ensuring it is closed safely after the request finishes.
     """
-    db = SessionLocal()
+    db = SESSION_LOCAL()
     try:
         yield db
     finally:
