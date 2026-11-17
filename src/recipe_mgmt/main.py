@@ -8,15 +8,11 @@ managing in-memory state and disk persistence (`storage.py`).
 from pathlib import Path
 from typing import List, Optional
 import json
-from fastapi import FastAPI, HTTPException, Query, Depends
-from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
-from recipe_mgmt.components import DietaryTag, Ingredient, RecipeIngredient
-from recipe_mgmt.recipe import Instruction, Recipe
-from recipe_mgmt.recipe_book import RecipeBook
-from recipe_mgmt.storage import select_loader
 from .database import get_db, engine, Base
 from .models import RecipeModel, RecipeIngredientModel, InstructionModel
 
@@ -30,10 +26,13 @@ app = FastAPI(
     redoc_url=None,
 )
 
+STATIC_DIR = Path(__file__).resolve().parents[2] / "static"
+
+# Mount the static files directory
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
 
 # --- Pydantic Models for Request Validation & Swagger UI ---
-
-
 class IngredientSchema(BaseModel):
     name: str = Field(..., example="Flour")
     dietary_tags: List[str] = Field(default=[], example=["VEGAN", "GLUTEN"])
@@ -58,8 +57,9 @@ class RecipeCreateSchema(BaseModel):
     instructions: List[InstructionSchema] = []
 
 
-# Initialize a shared RecipeBook instance for the app
-recipe_book = RecipeBook("My Recipe Collection", recipes=[])
+@app.get("/")
+async def read_index():
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.get("/recipes-db", summary="Get recipes from database")
@@ -87,6 +87,7 @@ def get_db_recipes(
 
         # Build dictionary containing all recipe fields
         recipe_dict = {
+            "id": r.id,
             "name": r.name,
             "total_prep_time": total_prep,
             "ingredients": [
@@ -173,15 +174,6 @@ def add_recipe(recipe_data: RecipeCreateSchema, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(db_recipe)
 
-        # (Optional) Keep your legacy CSV file export if you still want local flat-file backups
-        try:
-            loader = select_loader("csv")
-            filename = f"{recipe_data.name.lower().replace(' ', '_')}.csv"
-            destination = Path("src/recipe_mgmt/recipes") / filename
-            # Reconstruct domain model for CSV export if needed, or skip if fully moving to DB
-        except Exception:
-            pass
-
         return {
             "message": "Recipe added and saved to database successfully!",
             "id": db_recipe.id,
@@ -197,16 +189,80 @@ def add_recipe(recipe_data: RecipeCreateSchema, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.delete("/recipes/{name}", summary="Delete a recipe by name")
-def delete_recipe(name: str):
-    """Remove a recipe by name from the recipe book."""
+@app.delete("/recipes/{id}", summary="Delete a recipe by id")
+def delete_recipe(id: int, db: Session = Depends(get_db)):
+    """Remove a recipe by ID from the database."""
+    db_recipe = db.query(RecipeModel).filter(RecipeModel.id == id).first()
+    if not db_recipe:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Recipe with ID '{id}' not found in the database.",
+        )
+
+    recipe_name = db_recipe.name
     try:
-        recipe_book.remove_by_name(name)
-        return {"message": f"Recipe '{name}' deleted successfully"}
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        db.delete(db_recipe)
+        db.commit()
+        return {"message": f"Recipe '{recipe_name}' deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
-        # SCF Mount the "static" folder to the root URL
 
+@app.put("/recipes/{id}", summary="Update an existing recipe by id")
+def update_recipe(
+    id: int, recipe_data: RecipeCreateSchema, db: Session = Depends(get_db)
+):
+    """Update an existing recipe's name, ingredients, and instructions."""
+    db_recipe = db.query(RecipeModel).filter(RecipeModel.id == id).first()
+    if not db_recipe:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Recipe with ID '{id}' not found in the database.",
+        )
 
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+    # Prevent renaming to a name already used by a different recipe
+    duplicate = (
+        db.query(RecipeModel)
+        .filter(RecipeModel.name == recipe_data.name, RecipeModel.id != id)
+        .first()
+    )
+    if duplicate:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Another recipe named '{recipe_data.name}' already exists.",
+        )
+
+    try:
+        db_recipe.name = recipe_data.name
+
+        # Replace existing ingredients and instructions (cascade deletes orphans)
+        db_recipe.ingredients.clear()
+        for ri in recipe_data.recipe_ingredients:
+            db_recipe.ingredients.append(
+                RecipeIngredientModel(
+                    ingredient_name=ri.ingredient.name,
+                    quantity=ri.quantity,
+                    unit=ri.unit,
+                    dietary_tags=",".join(ri.ingredient.dietary_tags),
+                )
+            )
+
+        db_recipe.instructions.clear()
+        for ins in recipe_data.instructions:
+            db_recipe.instructions.append(
+                InstructionModel(
+                    description=ins.description,
+                    equipment=",".join(ins.equipment),
+                    prep_time=ins.prep_time,
+                    include_in_prep_time=ins.include_in_prep_time,
+                )
+            )
+
+        db.commit()
+        db.refresh(db_recipe)
+        return {"message": f"Recipe '{db_recipe.name}' updated successfully!"}
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))

@@ -6,10 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe Management Dashboard</title>
 
-    <!-- 1. Tailwind CSS CDN -->
+    <!-- JavaScript -->
+    <script src="/static/app.js" defer></script>
+
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- 2. HTMX CDN with integrity check -->
+    <!-- HTMX CDN with integrity check -->
     <script src="https://unpkg.com/htmx.org@1.9.12"
         integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc09BN2XoEG1ffH0W1TIFGBBvP3aiF32FkIF"
         crossorigin="anonymous"></script>
@@ -26,10 +29,9 @@
 
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-
             <!-- Section: Add Recipe Form -->
             <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700">Add a New Recipe</h2>
+                <h2 id="form-title" class="text-xl font-semibold mb-4 text-gray-700">Add a New Recipe</h2>
 
                 <form id="recipe-form" onsubmit="submitRecipe(event)" class="space-y-4">
                     <!-- Recipe Name -->
@@ -43,12 +45,9 @@
                     <div class="border-t pt-3 space-y-3">
                         <div class="flex justify-between items-center">
                             <h3 class="text-sm font-semibold text-gray-700">Ingredients</h3>
-                            <button type="button" onclick="addIngredient()"
-                                class="text-xs bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-medium px-2 py-1 rounded transition">
-                                + Add Ingredient
-                            </button>
                         </div>
 
+                        <!-- Container where ingredient rows are added -->
                         <div id="ingredients-container" class="space-y-3">
                             <div class="ingredient-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
                                 <div>
@@ -77,49 +76,67 @@
                             </div>
                         </div>
 
-                        <!-- Instruction Details -->
-                        <div class="border-t pt-3 space-y-3">
-                            <div class="flex justify-between items-center">
-                                <h3 class="text-sm font-semibold text-gray-700">Instruction Steps</h3>
-                                <button type="button" onclick="addInstructionStep()"
-                                    class="text-xs bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-medium px-2 py-1 rounded transition">
-                                    + Add Step
-                                </button>
-                            </div>
+                        <div class="flex justify-center pt-1">
+                            <button type="button" onclick="addIngredient()"
+                                class="text-xs bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-medium px-4 py-1.5 rounded-lg transition border border-emerald-100">
+                                + Add Another Ingredient
+                            </button>
+                        </div>
+                    </div>
 
-                            <div id="instructions-container" class="space-y-3">
-                                <div class="instruction-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-500 mb-1">Instructions</label>
-                                        <input type="text" placeholder="e.g. Mix ingredients in a bowl." required
-                                            class="ins-desc w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-500 mb-1">Equipment</label>
-                                        <input type="text" placeholder="e.g. mixing bowl, spoon"
-                                            class="ins-equip w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-500 mb-1">Step Prep Time
-                                            (minutes)</label>
-                                        <input type="number" value="5" required
-                                            class="ins-time w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                                    </div>
-                                    <div class="flex items-center justify-between pt-1">
-                                        <label class="flex items-center space-x-2 text-xs font-medium text-gray-600">
-                                            <input type="checkbox" checked
-                                                class="ins-include w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
-                                            <span>Include in total prep time?</span>
-                                        </label>
-                                    </div>
+                    <!-- Instruction Details -->
+                    <div class="border-t pt-3 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-semibold text-gray-700">Steps</h3>
+                        </div>
+
+                        <!-- Container where instruction rows are added -->
+                        <div id="instructions-container" class="space-y-3">
+                            <div class="instruction-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Step</label>
+                                    <input type="text" placeholder="e.g. Mix ingredients in a bowl." required
+                                        class="ins-desc w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Equipment</label>
+                                    <input type="text" placeholder="e.g. mixing bowl, spoon"
+                                        class="ins-equip w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Step Prep Time
+                                        (minutes)</label>
+                                    <input type="number" value="5" required
+                                        class="ins-time w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                                </div>
+                                <div class="flex items-center justify-between pt-1">
+                                    <label class="flex items-center space-x-2 text-xs font-medium text-gray-600">
+                                        <input type="checkbox" checked
+                                            class="ins-include w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+                                        <span>Include in total prep time?</span>
+                                    </label>
                                 </div>
                             </div>
-                        </div> <!-- Closes Instructions wrapper -->
+                        </div>
+                    </div> <!-- Closes Instructions wrapper -->
 
-                        <button type="submit"
-                            class="mt-4 w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition text-sm">
+                    <div class="flex justify-center pt-1">
+                        <button type="button" onclick="addInstructionStep()"
+                            class="text-xs bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-medium px-4 py-1.5 rounded-lg transition border border-emerald-100">
+                            + Add Another Step
+                        </button>
+                    </div>
+
+                    <div class="mt-4 flex gap-2">
+                        <button type="submit" id="submit-btn"
+                            class="w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition text-sm">
                             Save Recipe to Database
                         </button>
+                        <button type="button" id="cancel-edit-btn" onclick="cancelEdit()"
+                            class="hidden bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-300 transition text-sm">
+                            Cancel
+                        </button>
+                    </div>
                 </form>
 
                 <!-- Feedback target container -->
@@ -146,248 +163,39 @@
             </section>
 
         </div>
-    </div>
 
-    <!-- Recipe Details Modal (Pop-up Window) -->
-    <div id="recipe-modal"
-        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl max-w-lg w-full p-6 space-y-4 shadow-xl relative">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 id="modal-title" class="text-xl font-bold text-emerald-700">Recipe Details</h3>
-                <button onclick="closeRecipeModal()"
-                    class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
-            </div>
+        <!-- Recipe Details Modal (Pop-up Window) -->
+        <div id="recipe-modal"
+            class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-xl max-w-lg w-full p-6 space-y-4 shadow-xl relative">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 id="modal-title" class="text-xl font-bold text-emerald-700">Recipe Details</h3>
+                    <button onclick="closeRecipeModal()"
+                        class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+                </div>
 
-            <div id="modal-content" class="space-y-4 text-sm text-gray-600 max-h-96 overflow-y-auto">
-                <!-- Populated dynamically via JS -->
-            </div>
+                <div id="modal-content" class="space-y-4 text-sm text-gray-600 max-h-96 overflow-y-auto">
+                    <!-- Populated dynamically via JS -->
+                </div>
 
-            <div class="flex justify-end pt-3 border-t">
-                <button onclick="closeRecipeModal()"
-                    class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition">
-                    Close
-                </button>
+                <div class="flex justify-between items-center pt-3 border-t">
+                    <div class="space-x-2">
+                        <button id="edit-recipe-btn" onclick="startEditRecipe()"
+                            class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-100 transition">
+                            Edit Recipe
+                        </button>
+                        <button id="delete-recipe-btn" onclick="deleteRecipe()"
+                            class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition">
+                            Delete Recipe
+                        </button>
+                    </div>
+                    <button onclick="closeRecipeModal()"
+                        class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition">
+                        Close
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- Script to handle form submission and recipe modal pop-up -->
-    <script>
-        // Helper function to append a new ingredient row
-        function addIngredient(ingredientName = '', dietaryTags = '', quantity = 1, unit = '') {
-            const container = document.getElementById('ingredients-container');
-            const row = document.createElement('div');
-            row.className = 'ingredient-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2';
-            row.innerHTML = `
-                <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Ingredient Name</label>
-                    <input type="text" placeholder="e.g. Flour" value="${ingredientName}" required
-                        class="ing-name w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Dietary Tags (comma-separated)</label>
-                    <input type="text" placeholder="e.g. VEGAN, GLUTEN" value="${dietaryTags}"
-                        class="ing-tags w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Quantity</label>
-                        <input type="number" step="0.1" value="${quantity}" required
-                            class="ing-quantity w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Unit</label>
-                        <input type="text" placeholder="e.g. cups" value="${unit}" required
-                            class="ing-unit w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                    </div>
-                </div>
-                <div class="flex items-center justify-between pt-1">
-                    <button type="button" onclick="this.closest('.ingredient-row').remove()"
-                        class="text-xs text-red-500 hover:text-red-700 font-medium">
-                        Remove Ingredient
-                    </button>
-                </div>
-            `;
-            container.appendChild(row);
-        }
-
-        // Helper function to append a new step row
-        function addInstructionStep(instruction = '', equipment = '', prepTime = 5, includeInPrep = true) {
-            const container = document.getElementById('instructions-container');
-            const row = document.createElement('div');
-            row.className = 'instruction-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2';
-            row.innerHTML = `
-                <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Instruction</label>
-                    <input type="text" placeholder="e.g. Mix ingredients in a bowl." value="${instruction}" required
-                        class="ins-desc w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Equipment</label>
-                    <input type="text" placeholder="e.g. mixing bowl, spoon" value="${equipment}"
-                        class="ins-equip w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Step Prep Time (minutes)</label>
-                    <input type="number" value="${prepTime}" required
-                        class="ins-time w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                </div>
-                <div class="flex items-center justify-between pt-1">
-                    <label class="flex items-center space-x-2 text-xs font-medium text-gray-600">
-                        <input type="checkbox" ${includeInPrep ? 'checked' : ''} class="ins-include w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
-                        <span>Include in total prep time?</span>
-                    </label>
-                    <button type="button" onclick="this.closest('.instruction-row').remove()"
-                        class="text-xs text-red-500 hover:text-red-700 font-medium">
-                        Remove Step
-                    </button>
-                </div>
-            `;
-            container.appendChild(row);
-        }
-
-        async function submitRecipe(event) {
-            event.preventDefault();
-
-            const name = document.getElementById('recipe-name').value;
-
-            // Collect all ingredient rows dynamically
-            const ingredientRows = document.querySelectorAll('.ingredient-row');
-            const recipeIngredients = [];
-            ingredientRows.forEach(row => {
-                const ingredientName = row.querySelector('.ing-name').value;
-                const dietaryTagsRaw = row.querySelector('.ing-tags').value;
-                const dietaryTags = dietaryTagsRaw ? dietaryTagsRaw.split(',').map(e => e.trim()).filter(e => e.length > 0) : [];
-                const quantity = parseFloat(row.querySelector('.ing-quantity').value);
-                const unit = row.querySelector('.ing-unit').value;
-
-                recipeIngredients.push({
-                    ingredient: {
-                        name: ingredientName,
-                        dietary_tags: dietaryTags
-                    },
-                    quantity: quantity,
-                    unit: unit
-                });
-            });
-
-            // Collect all instruction rows dynamically
-            const instructionRows = document.querySelectorAll('.instruction-row');
-            const instructions = [];
-            instructionRows.forEach(row => {
-                const desc = row.querySelector('.ins-desc').value;
-                const equipRaw = row.querySelector('.ins-equip').value;
-                const equipment = equipRaw ? equipRaw.split(',').map(e => e.trim()).filter(e => e.length > 0) : [];
-                const prepTime = parseInt(row.querySelector('.ins-time').value, 10);
-                const includeInPrepTime = row.querySelector('.ins-include').checked;
-
-                instructions.push({
-                    description: desc,
-                    prep_time: prepTime,
-                    equipment: equipment,
-                    include_in_prep_time: includeInPrepTime
-                });
-            });
-
-            const payload = {
-                name: name,
-                recipe_ingredients: recipeIngredients,
-                instructions: instructions
-            };
-
-            try {
-                const response = await fetch('/recipes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-                const resultDiv = document.getElementById('result-message');
-
-                if (response.ok) {
-                    resultDiv.innerHTML = `<div class='p-3 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200 text-xs'>${result.message}</div>`;
-                    loadRecipes();
-                    document.getElementById('recipe-form').reset();
-
-                    // Reset back to single clean rows
-                    document.getElementById('instructions-container').innerHTML = '';
-                    addInstructionStep();
-                    document.getElementById('ingredients-container').innerHTML = '';
-                    addIngredient();
-                } else {
-                    resultDiv.innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Error: ${result.detail || 'Failed to save'}</div>`;
-                }
-            } catch (err) {
-                document.getElementById('result-message').innerHTML = `<div class='p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs'>Network error: ${err.message}</div>`;
-            }
-        }
-
-        // Functions to open and populate the modal with recipe details
-        function openRecipeModal(button) {
-            const modal = document.getElementById('recipe-modal');
-            const modalTitle = document.getElementById('modal-title');
-            const modalContent = document.getElementById('modal-content');
-
-            const recipeData = JSON.parse(button.getAttribute('data-recipe'));
-            modalTitle.innerText = recipeData.name;
-
-            let ingredientsHtml = '<h4 class="font-semibold text-gray-700 mt-2">Ingredients:</h4><ul class="list-disc list-inside space-y-1 text-sm">';
-            if (recipeData.ingredients && recipeData.ingredients.length > 0) {
-                recipeData.ingredients.forEach(ing => {
-                    const tags = ing.dietary_tags && ing.dietary_tags.length > 0 ? ` <span class="text-xs bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded">${ing.dietary_tags.join(', ')}</span>` : '';
-                    ingredientsHtml += `<li>${ing.quantity} ${ing.unit} ${ing.name}${tags}</li>`;
-                });
-            } else {
-                ingredientsHtml += '<li class="text-gray-400 italic">No ingredients listed.</li>';
-            }
-            ingredientsHtml += '</ul>';
-
-            let instructionsHtml = '<h4 class="font-semibold text-gray-700 mt-4">Instructions:</h4><ol class="list-decimal list-inside space-y-2 text-sm">';
-            if (recipeData.instructions && recipeData.instructions.length > 0) {
-                recipeData.instructions.forEach(ins => {
-                    const equipText = ins.equipment && ins.equipment.length > 0
-                        ? ` <span class="text-xs text-gray-500 font-medium">[Equipment: ${ins.equipment.join(', ')}]</span>`
-                        : '';
-                    const prepNote = ins.include_in_prep_time
-                        ? `(Prep: ${ins.prep_time} mins)`
-                        : `(Prep: ${ins.prep_time} mins - excluded)`;
-
-                    instructionsHtml += `<li>${ins.description}${equipText} <span class="text-xs text-gray-400">${prepNote}</span></li>`;
-                });
-            } else {
-                instructionsHtml += '<li class="text-gray-400 italic">No instructions listed.</li>';
-            }
-            instructionsHtml += '</ol>';
-
-            modalContent.innerHTML = `
-                <p class="text-sm"><strong>Total Prep Time:</strong> ${recipeData.total_prep_time} minutes</p>
-                ${ingredientsHtml}
-                ${instructionsHtml}
-            `;
-
-            modal.classList.remove('hidden');
-        }
-
-        function closeRecipeModal() {
-            document.getElementById('recipe-modal').classList.add('hidden');
-        }
-
-        async function loadRecipes() {
-            const container = document.getElementById('recipe-list-container');
-            container.innerHTML = "<p class='text-gray-400 italic text-sm'>Loading recipes from database...</p>";
-
-            try {
-                const response = await fetch('/recipes-db');
-                const htmlContent = await response.text();
-                container.innerHTML = htmlContent;
-            } catch (err) {
-                container.innerHTML = `<p class='text-red-500 text-xs'>Failed to load recipes: ${err.message}</p>`;
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', loadRecipes);
-    </script>
 </body>
 
 </html>
