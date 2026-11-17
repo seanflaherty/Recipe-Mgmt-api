@@ -63,8 +63,9 @@ class Recipe:
         instructions: A list of `Instruction` objects detailing the preparation steps.
 
     Properties:
-        total_prep_time: Calculates the aggregate preparation time across all included instructions.
-        required_equipment: Collects a unique set of all equipment needed by the recipe's instructions.
+        total_prep_time: Calculates the aggregate preparation time across all
+        included instructions. required_equipment: Collects a unique set of all
+        equipment needed by the recipe's instructions.
     """
 
     def __init__(
