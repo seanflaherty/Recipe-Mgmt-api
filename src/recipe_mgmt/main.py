@@ -90,7 +90,7 @@ class RecipeCreateSchema(BaseModel):
     instructions: List[InstructionSchema] = []
 
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def read_index():
     """Serve the main frontend user interface HTML page.
 
