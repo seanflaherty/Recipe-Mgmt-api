@@ -96,41 +96,70 @@ function cancelEdit() {
 
 
 // Helper function to append a new ingredient row
-function addIngredient() {
-    const container = document.getElementById("ingredients-container");
-    const row = document.createElement("div");
-    row.className = "ingredient-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2";
+function addIngredient(ingredientName = '', dietaryTags = '', quantity = 1, unit = '') {
+    const container = document.getElementById('ingredients-container');
+    const row = document.createElement('div');
+    row.className = 'ingredient-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2';
     row.innerHTML = `
+    <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Ingredient Name</label>
+        <input type="text" placeholder="e.g. Flour" value="${ingredientName}" required
+            class="ing-name w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+    </div>
+    <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Dietary Tags (comma-separated)</label>
+        <input type="text" placeholder="e.g. VEGAN, GLUTEN" value="${dietaryTags}"
+            class="ing-tags w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+    </div>
+    <div class="grid grid-cols-2 gap-2">
         <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1">Ingredient Name</label>
-            <input type="text" placeholder="e.g. Flour" required
-                class="ing-name w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+            <label class="block text-xs font-medium text-gray-500 mb-1">Quantity</label>
+            <input type="number" step="0.1" value="${quantity}" required
+                class="ing-quantity w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
         </div>
         <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1">Dietary Tags (comma-separated)</label>
-            <input type="text" placeholder="e.g. VEGAN, GLUTEN"
-                class="ing-tags w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+            <label class="block text-xs font-medium text-gray-500 mb-1">Unit</label>
+            <input type="text" placeholder="e.g. cups" value="${unit}" required
+                class="ing-unit w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
         </div>
-        <div class="grid grid-cols-2 gap-2">
-            <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">Quantity</label>
-                <input type="number" step="0.1" value="1.0" required
-                    class="ing-quantity w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">Unit</label>
-                <input type="text" placeholder="e.g. cups" required
-                    class="ing-unit w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-            </div>
-        </div>
-        <div class="flex items-center justify-end pt-1">
-            <button type="button" onclick="this.closest('.ingredient-row').remove()"
-                class="text-xs text-red-500 hover:text-red-700 font-medium">
-                Remove Ingredient
-            </button>
-        </div>
+    </div>
+    <div class="remove-btn-container flex items-center justify-end pt-1">
+        <button type="button" onclick="removeIngredientRow(this)"
+            class="text-xs text-red-500 hover:text-red-700 font-medium">
+            Remove Ingredient
+        </button>
+    </div>
     `;
     container.appendChild(row);
+    updateIngredientRemoveButtons();
+}
+
+function removeIngredientRow(button) {
+    const row = button.closest('.ingredient-row');
+    const container = document.getElementById('ingredients-container');
+
+    // Only remove if there is more than one row left
+    if (container.querySelectorAll('.ingredient-row').length > 1) {
+        row.remove();
+        updateIngredientRemoveButtons();
+    }
+}
+
+function updateIngredientRemoveButtons() {
+    const container = document.getElementById('ingredients-container');
+    const rows = container.querySelectorAll('.ingredient-row');
+
+    rows.forEach(row => {
+        const removeContainer = row.querySelector('.remove-btn-container');
+        if (removeContainer) {
+            // Hide the remove button if only 1 row remains; show on the right if 2 or more exist
+            if (rows.length === 1) {
+                removeContainer.style.display = 'none';
+            } else {
+                removeContainer.style.display = 'flex';
+            }
+        }
+    });
 }
 
 // Helper function to append a new step row
