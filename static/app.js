@@ -123,14 +123,43 @@ function addIngredient(ingredientName = '', dietaryTags = '', quantity = 1, unit
                 class="ing-unit w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
         </div>
     </div>
-    <div class="flex items-center justify-between pt-1">
-        <button type="button" onclick="this.closest('.ingredient-row').remove()"
+    <div class="remove-btn-container flex items-center justify-end pt-1">
+        <button type="button" onclick="removeIngredientRow(this)"
             class="text-xs text-red-500 hover:text-red-700 font-medium">
             Remove Ingredient
         </button>
     </div>
     `;
     container.appendChild(row);
+    updateIngredientRemoveButtons();
+}
+
+function removeIngredientRow(button) {
+    const row = button.closest('.ingredient-row');
+    const container = document.getElementById('ingredients-container');
+
+    // Only remove if there is more than one row left
+    if (container.querySelectorAll('.ingredient-row').length > 1) {
+        row.remove();
+        updateIngredientRemoveButtons();
+    }
+}
+
+function updateIngredientRemoveButtons() {
+    const container = document.getElementById('ingredients-container');
+    const rows = container.querySelectorAll('.ingredient-row');
+
+    rows.forEach(row => {
+        const removeContainer = row.querySelector('.remove-btn-container');
+        if (removeContainer) {
+            // Hide the remove button if only 1 row remains; show on the right if 2 or more exist
+            if (rows.length === 1) {
+                removeContainer.style.display = 'none';
+            } else {
+                removeContainer.style.display = 'flex';
+            }
+        }
+    });
 }
 
 // Helper function to append a new step row
