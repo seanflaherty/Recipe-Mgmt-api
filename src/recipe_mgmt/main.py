@@ -100,6 +100,15 @@ async def read_index():
     """
     return FileResponse(STATIC_DIR / "index.html")
 
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    """Serve the favicon.ico file directly from the static assets directory.
+
+    Returns:
+        FileResponse: The favicon.ico file from STATIC_DIR.
+    """
+    return FileResponse(STATIC_DIR / "favicon.ico")
+
 
 @app.get("/recipes-db", summary="Get recipes from database")
 def get_db_recipes(
