@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Management Dashboard</title>
+
+    <!-- JavaScript -->
+    <script src="/static/app.js" defer></script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- HTMX CDN with integrity check -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"
+        integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc09BN2XoEG1ffH0W1TIFGBBvP3aiF32FkIF"
+        crossorigin="anonymous"></script>
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen p-6">
+
+    <div class="max-w-4xl mx-auto space-y-8">
+        <!-- Header -->
+        <header class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h1 class="text-3xl font-bold text-emerald-600">🍳 Recipe Manager</h1>
+            <p class="text-gray-500 text-sm mt-1">Powered by FastAPI, Tailwind, and HTMX</p>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Section: Add Recipe Form -->
+            <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h2 id="form-title" class="text-xl font-semibold mb-4 text-gray-700">Add a New Recipe</h2>
+
+                <form id="recipe-form" onsubmit="submitRecipe(event)" class="space-y-4">
+                    <!-- Recipe Name -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Recipe Name</label>
+                        <input type="text" id="recipe-name" placeholder="e.g. Homemade Bread" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none text-sm">
+                    </div>
+
+                    <!-- Ingredient Details -->
+                    <div class="border-t pt-3 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-semibold text-gray-700">Ingredients</h3>
+                        </div>
+
+                        <!-- Container where ingredient rows are added -->
+                        <div id="ingredients-container" class="space-y-3">
+                            <div class="ingredient-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Ingredient Name</label>
+                                    <input type="text" placeholder="e.g. Flour" required
+                                        class="ing-name w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Dietary Tags
+                                        (comma-separated)</label>
+                                    <input type="text" placeholder="e.g. VEGAN, GLUTEN"
+                                        class="ing-tags w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-500 mb-1">Quantity</label>
+                                        <input type="number" step="0.1" value="1.0" required
+                                            class="ing-quantity w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-500 mb-1">Unit</label>
+                                        <input type="text" placeholder="e.g. cups" required
+                                            class="ing-unit w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                                    </div>
+                                </div>
+                                <!-- No remove button here on the first row -->
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center pt-1">
+                            <button type="button" onclick="addIngredient()"
+                                class="text-xs bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-medium px-4 py-1.5 rounded-lg transition border border-emerald-100">
+                                + Add Another Ingredient
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Instruction Details -->
+                    <div class="border-t pt-3 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-semibold text-gray-700">Steps</h3>
+                        </div>
+
+                        <!-- Container where instruction rows are added -->
+                        <div id="instructions-container" class="space-y-3">
+                            <div class="instruction-row p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Step</label>
+                                    <input type="text" placeholder="e.g. Mix ingredients in a bowl." required
+                                        class="ins-desc w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Equipment</label>
+                                    <input type="text" placeholder="e.g. mixing bowl, spoon"
+                                        class="ins-equip w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Step Prep Time
+                                        (minutes)</label>
+                                    <input type="number" value="5" required
+                                        class="ins-time w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+                                </div>
+                                <div class="flex items-center justify-between pt-1">
+                                    <label class="flex items-center space-x-2 text-xs font-medium text-gray-600">
+                                        <input type="checkbox" checked
+                                            class="ins-include w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+                                        <span>Include in total prep time?</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- Closes Instructions wrapper -->
+
+                    <div class="flex justify-center pt-1">
+                        <button type="button" onclick="addInstructionStep()"
+                            class="text-xs bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-medium px-4 py-1.5 rounded-lg transition border border-emerald-100">
+                            + Add Another Step
+                        </button>
+                    </div>
+
+                    <div class="mt-4 flex gap-2">
+                        <button type="submit" id="submit-btn"
+                            class="w-full bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition text-sm">
+                            Save Recipe to Database
+                        </button>
+                        <button type="button" id="cancel-edit-btn" onclick="cancelEdit()"
+                            class="hidden bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-300 transition text-sm">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Feedback target container -->
+                <div id="result-message" class="mt-4 text-sm"></div>
+            </section>
+
+            <!-- Section: Recipe List -->
+            <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-700">Recipe Book</h2>
+
+                    <!-- Refresh List Button powered by HTMX -->
+                    <button hx-get="/recipes-db" hx-target="#recipe-list-container" hx-swap="innerHTML"
+                        class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition">
+                        Refresh List
+                    </button>
+                </div>
+
+                <!-- HTMX GET trigger on page load -->
+                <div id="recipe-list-container" hx-get="/recipes-db" hx-trigger="load" hx-swap="innerHTML"
+                    class="text-gray-500 italic text-sm">
+                    Loading recipes from database...
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Recipe Details Modal (Pop-up Window) -->
+        <div id="recipe-modal"
+            class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-xl max-w-lg w-full p-6 space-y-4 shadow-xl relative">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 id="modal-title" class="text-xl font-bold text-emerald-700">Recipe Details</h3>
+                    <button onclick="closeRecipeModal()"
+                        class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+                </div>
+
+                <div id="modal-content" class="space-y-4 text-sm text-gray-600 max-h-96 overflow-y-auto">
+                    <!-- Populated dynamically via JS -->
+                </div>
+
+                <div class="flex justify-between items-center pt-3 border-t">
+                    <div class="space-x-2">
+                        <button id="edit-recipe-btn" onclick="startEditRecipe()"
+                            class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-100 transition">
+                            Edit Recipe
+                        </button>
+                        <button id="delete-recipe-btn" onclick="deleteRecipe()"
+                            class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition">
+                            Delete Recipe
+                        </button>
+                    </div>
+                    <button onclick="closeRecipeModal()"
+                        class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+</body>
+
+</html>

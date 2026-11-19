@@ -1,10 +1,18 @@
-"""A module containing the Recipe and related classes."""
+"""Defines the Recipe and Instruction domain models for the recipe management system."""
 
 from recipe_mgmt.components import RecipeIngredient
 
 
 class Instruction:
-    """A single step or instruction in a recipe."""
+    """Represents a single preparation step or instruction in a recipe.
+
+    Attributes:
+        description: The text describing the action to perform.
+        prep_time: The estimated time required for this step in minutes.
+        equipment: A list of kitchen tools or equipment needed for the step.
+        include_in_prep_time: Whether this step's duration should contribute
+            to the recipe's total prep time calculation.
+    """
 
     def __init__(
         self,
@@ -31,6 +39,12 @@ class Instruction:
         )
 
     def to_dict(self) -> dict:
+        """Convert the instance into a dictionary representation.
+
+        Returns:
+            dict: A dictionary containing description, prep_time,
+            equipment, and include_in_prep_time.
+        """
         return {
             "description": self.description,
             "prep_time": self.prep_time,
@@ -40,7 +54,19 @@ class Instruction:
 
 
 class Recipe:
-    """Recipe class."""
+    """Represents a complete recipe, including ingredients, instructions, and metadata.
+
+    Attributes:
+        name: The display name of the recipe.
+        recipe_ingredients: A list of `RecipeIngredient` associations linking the
+            recipe to its required ingredients.
+        instructions: A list of `Instruction` objects detailing the preparation steps.
+
+    Properties:
+        total_prep_time: Calculates the aggregate preparation time across all
+        included instructions. required_equipment: Collects a unique set of all
+        equipment needed by the recipe's instructions.
+    """
 
     def __init__(
         self,
@@ -95,6 +121,10 @@ class Recipe:
         )
 
     def to_dict(self) -> dict:
+        """Serialize the recipe into a dictionary format suitable for JSON responses.
+
+        Includes the recipe metadata, ingredients, dietary information, and instruction
+        details in a nested structure ready for API serialization."""
         return {
             "name": self.name,
             "total_prep_time": self.total_prep_time,

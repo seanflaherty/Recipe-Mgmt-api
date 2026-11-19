@@ -13,10 +13,14 @@ class RecipeModel(Base):
 
     # Relationships to child tables
     ingredients = relationship(
-        "RecipeIngredientModel", cascade="all, delete-orphan", back_populates="recipe"
+        "RecipeIngredientModel",
+        back_populates="recipe",
+        cascade="all, delete-orphan",
     )
     instructions = relationship(
-        "InstructionModel", cascade="all, delete-orphan", back_populates="recipe"
+        "InstructionModel",
+        back_populates="recipe",
+        cascade="all, delete-orphan",
     )
 
 
@@ -39,6 +43,7 @@ class InstructionModel(Base):
     id = Column(Integer, primary_key=True, index=True)
     recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=False)
     description = Column(String, nullable=False)
+    equipment = Column(String, default="")
     prep_time = Column(Integer, default=0)
     include_in_prep_time = Column(Boolean, default=True)
 
